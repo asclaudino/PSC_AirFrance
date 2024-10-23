@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Pairing:
+class Standby:
 
     def __init__(self, id, blockPeriod):
         self.id = id
