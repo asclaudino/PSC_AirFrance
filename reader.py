@@ -1,15 +1,22 @@
-from bs4 import BeautifulSoup
-import xmltodict
+#from bs4 import BeautifulSoup
+#import xmltodict
 import json
+from GroundActivity import GroundActivity
 
-
-
-with open('insolo.json', 'r') as file:
+with open('Ressources/insolo.json', 'r') as file:
     data = json.load(file)
-    
-print(data.get('EasyData').get('Activities').get('GroundActivity'))
-var = 
-my_new_easydata = EasyData(var)
+
+ground_activity_assignments = data.get('EasyData').get('Activities').get('GroundActivity')
+
+
+dict_ground = {}
+for x in ground_activity_assignments:
+    id = x.get('@id')
+    block = x.get('@blockPeriod')
+    dict_ground[f"{id}"] = GroundActivity(id,block)
+
+
+#my_new_easydata = EasyData(var)
 
 
 
