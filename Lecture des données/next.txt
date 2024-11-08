@@ -1,0 +1,7 @@
+two new columns at the display window:
+    id and name of the activities
+Add at all classes:
+    racDuration (repos)
+    rpcDuration (repos)
+Containeraizing of the reader 
+
