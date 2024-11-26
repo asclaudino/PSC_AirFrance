@@ -93,15 +93,17 @@ blocks.sort()
 
 #### Affichage des blockperiods
 
-
-
-# Création d'une liste de tuples de périodes (début, fin) à partir de la liste "blocks"
-def create_periods(blocks):
-    return [(blocks[i], blocks[i+1]) for i in range(0, len(blocks), 2)]
+def create_periods(assignments):
+    periods = []
+    for key, activity in assignments.items():
+        if activity.blockPeriod:
+            start, end = activity.parse_block_period(activity.blockPeriod)
+            periods.append((activity.id, activity.__class__.__name__, start, end))
+    return periods
 
 # Conversion des périodes en DataFrame pour faciliter l'affichage
-periods = create_periods(blocks)
-df_blocks = pd.DataFrame(periods, columns=['Début', 'Fin'])
+periods = create_periods(pilot1.assignments)
+df_blocks = pd.DataFrame(periods, columns=['ID', 'Activity','Début', 'Fin'])
 
 # Création de la fenêtre principale
 root = tk.Tk()
