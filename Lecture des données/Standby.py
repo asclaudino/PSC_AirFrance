@@ -5,6 +5,7 @@ class Standby:
     def __init__(self, id, blockPeriod):
         self.id = id
         self.blockPeriod = blockPeriod
+        self.rpcDuration = None
     
     
     def parse_block_period(self, block_period):
