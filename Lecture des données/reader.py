@@ -12,72 +12,97 @@ from Pairing import Pairing
 from Standby import Standby
 from IndividualAssignment import IndividualAssignment
 from Pilot import Pilot
+from readerClass import readerClass
 
 with open('Ressources/insolo.json', 'r') as file:
     data = json.load(file)
 
 
+reader = readerClass()
+
 ## Création des classes d'activités
 #Creating ground activities
-ground_activity = data.get('EasyData').get('Activities').get('GroundActivity')
+#------------------------------------------------------------------------------------
+#Reste dans la main (ce que reader.py va devenir)
 
-dict_ground = {}
-for x in ground_activity:
-    id = x.get('@id')
-    block = x.get('@blockPeriod')
-    dict_ground[id] = GroundActivity(id,block)
+ground_activity = data.get('EasyData').get('Activities').get('GroundActivity')
+dict_ground = reader.GroundActivityReader(ground_activity)
+print(dict_ground)
+# dict_ground = {}
+# for x in ground_activity:
+#     id = x.get('@id')
+#     block = x.get('@blockPeriod')
+#     dict_ground[id] = GroundActivity(id,block)
+
+#------------------------------------------------------------------------------------
+
 
 
 #Creating pairings
-pairing = data.get('EasyData').get('Activities').get('Pairing')
-dict_pairing = {}
+#------------------------------------------------------------------------------------
+##Reste dans la main (ce que reader.py va devenir)
 
-for x in pairing:
-    id = x.get('@id')
-    block = x.get('PairingValues').get('COPairingElements').get('@blockPeriod')
-    dict_pairing[id] = Pairing(id,block)
+pairing = data.get('EasyData').get('Activities').get('Pairing')
+dict_pairing = reader.PairingsReader(pairing)
+
+
+# for x in pairing:
+#     id = x.get('@id')
+#     block = x.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+#     dict_pairing[id] = Pairing(id,block)
+#------------------------------------------------------------------------------------
+
+
 
 #Creating Standby (in the present case it seems there is only one Standby assignement ; hence the absence of a loop)
+#------------------------------------------------------------------------------------
+#Reste dans la main (ce que reader.py va devenir)
+
 standby_data = data.get('EasyData').get('Activities').get('Standby')
-dict_standby = {}
+dict_standby = reader.StandByReader(standby_data)
 
-id = standby_data.get('@id') 
-block = standby_data.get('StandbyElements').get('@blockPeriod')
-dict_standby[id] = Standby(id, block)
+# id = standby_data.get('@id') 
+# block = standby_data.get('StandbyElements').get('@blockPeriod')
+# dict_standby[id] = Standby(id, block)
 
-#------------------
+#------------------------------------------------------------------------------------
 
 ##Creating a pilot : pilot1 
-pilot1 = Pilot(data.get('EasyData').get('Roster').get('CockpitCrew').get('@fcNumber'),{})
+roster = data.get('EasyData').get('Roster')
+pilot1 = reader.PilotReader(roster)
+# pilot1 = Pilot(data.get('EasyData').get('Roster').get('CockpitCrew').get('@fcNumber'),{})
+
 
 assignments = data.get('EasyData').get('Roster').get('Assignments')
 
-#Adding all the assignments to a dictionnary
-for x in assignments.get('GroundActivityAssignment'):
-    assignmentcourant = x.get('@activityId')
-    if assignmentcourant in dict_ground: pilot1.assignments[assignmentcourant] = dict_ground[assignmentcourant]
-    else : print('Base de données de GroundActivity incomplète')
 
 
-for x in assignments.get('PairingAssignment'):
-    assignmentcourant = x.get('@activityId')
-    if assignmentcourant in dict_pairing : pilot1.assignments[assignmentcourant] = dict_pairing[assignmentcourant]
-    else : print('Base de données des Pairings incomplète')
+# #Adding all the assignments to a dictionnary
+# for x in assignments.get('GroundActivityAssignment'):
+#     assignmentcourant = x.get('@activityId')
+#     if assignmentcourant in dict_ground: pilot1.assignments[assignmentcourant] = dict_ground[assignmentcourant]
+#     else : print('Base de données de GroundActivity incomplète')
+
+
+# for x in assignments.get('PairingAssignment'):
+#     assignmentcourant = x.get('@activityId')
+#     if assignmentcourant in dict_pairing : pilot1.assignments[assignmentcourant] = dict_pairing[assignmentcourant]
+#     else : print('Base de données des Pairings incomplète')
 
 #Only one Standby, hence no loop
-assignmentcourant= assignments.get('StandbyAssignment').get('@activityId')
-if assignmentcourant in dict_standby : pilot1.assignments[assignmentcourant] = dict_standby[assignmentcourant]
-else : print('Base de données des Standby incomplète') 
+# assignmentcourant= assignments.get('StandbyAssignment').get('@activityId')
+# if assignmentcourant in dict_standby : pilot1.assignments[assignmentcourant] = dict_standby[assignmentcourant]
+# else : print('Base de données des Standby incomplète') 
         
 
-for x in assignments.get('IndividualAssignment'):
-    id = x.get('@id')
-    block = x.get('Elements').get('@blockPeriod')
-    pilot1.assignments[f"{id}"] = IndividualAssignment(id,block)
+# for x in assignments.get('IndividualAssignment'):
+#     id = x.get('@id')
+#     block = x.get('Elements').get('@blockPeriod')
+#     pilot1.assignments[f"{id}"] = IndividualAssignment(id,block)
 
-#pilot1 est désormais initialisé, avec son id et un dictionnaire qui contient toutes ses activités
+# #pilot1 est désormais initialisé, avec son id et un dictionnaire qui contient toutes ses activités
 
-#------------
+# #------------
 
 blocks = [] #initializing a list that contains all the block periods
    
