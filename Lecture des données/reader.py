@@ -54,16 +54,31 @@ dict_pairing = reader.PairingsReader(pairing)
 
 
 
+
+for x in pairing:
+    id = x.get('@id')
+    block = x.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+    dict_pairing[id] = Pairing(id,block)
+    dict_pairing[id].racDuration = x.get('PairingValues').get('COPairingElements').get('@racDuration')
+    dict_pairing[id].rpcDuration = x.get('PairingValues').get('COPairingElements').get('@rpcDuration')
+
 #Creating Standby (in the present case it seems there is only one Standby assignement ; hence the absence of a loop)
 #------------------------------------------------------------------------------------
 #Reste dans la main (ce que reader.py va devenir)
 
 standby_data = data.get('EasyData').get('Activities').get('Standby')
+
 dict_standby = reader.StandByReader(standby_data)
 
 # id = standby_data.get('@id') 
 # block = standby_data.get('StandbyElements').get('@blockPeriod')
 # dict_standby[id] = Standby(id, block)
+dict_standby = {}
+id = standby_data.get('@id') 
+block = standby_data.get('StandbyElements').get('@blockPeriod')
+rpcDuration = standby_data.get('StandbyElements').get('rpcDuration')
+dict_standby[id] = Standby(id, block)
+dict_standby[id].rpcDuration = rpcDuration
 
 #------------------------------------------------------------------------------------
 
@@ -118,15 +133,17 @@ blocks.sort()
 
 #### Affichage des blockperiods
 
-
-
-# Création d'une liste de tuples de périodes (début, fin) à partir de la liste "blocks"
-def create_periods(blocks):
-    return [(blocks[i], blocks[i+1]) for i in range(0, len(blocks), 2)]
+def create_periods(assignments):
+    periods = []
+    for key, activity in assignments.items():
+        if activity.blockPeriod:
+            start, end = activity.parse_block_period(activity.blockPeriod)
+            periods.append((activity.id, activity.__class__.__name__, start, end))
+    return periods
 
 # Conversion des périodes en DataFrame pour faciliter l'affichage
-periods = create_periods(blocks)
-df_blocks = pd.DataFrame(periods, columns=['Début', 'Fin'])
+periods = create_periods(pilot1.assignments)
+df_blocks = pd.DataFrame(periods, columns=['ID', 'Activity','Début', 'Fin'])
 
 # Création de la fenêtre principale
 root = tk.Tk()
