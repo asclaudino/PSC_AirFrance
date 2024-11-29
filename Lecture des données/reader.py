@@ -42,7 +42,6 @@ for x in pairing:
 #Creating Standby (in the present case it seems there is only one Standby assignement ; hence the absence of a loop)
 standby_data = data.get('EasyData').get('Activities').get('Standby')
 dict_standby = {}
-print(standby_data)
 id = standby_data.get('@id') 
 block = standby_data.get('StandbyElements').get('@blockPeriod')
 rpcDuration = standby_data.get('StandbyElements').get('rpcDuration')
