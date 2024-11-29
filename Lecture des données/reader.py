@@ -35,18 +35,19 @@ dict_pairing = {}
 for x in pairing:
     id = x.get('@id')
     block = x.get('PairingValues').get('COPairingElements').get('@blockPeriod')
-    Pairing.get('PairingValues').get('COPairingElements').get('@racDuration')
-    Pairing.get('PairingValues').get('COPairingElements').get('@rpcDuration')
     dict_pairing[id] = Pairing(id,block)
+    dict_pairing[id].racDuration = x.get('PairingValues').get('COPairingElements').get('@racDuration')
+    dict_pairing[id].rpcDuration = x.get('PairingValues').get('COPairingElements').get('@rpcDuration')
 
 #Creating Standby (in the present case it seems there is only one Standby assignement ; hence the absence of a loop)
 standby_data = data.get('EasyData').get('Activities').get('Standby')
 dict_standby = {}
-
+print(standby_data)
 id = standby_data.get('@id') 
 block = standby_data.get('StandbyElements').get('@blockPeriod')
-rpcDuration = Standby.get('StanbyElement').get('rpcDuration')
+rpcDuration = standby_data.get('StandbyElements').get('rpcDuration')
 dict_standby[id] = Standby(id, block)
+dict_standby[id].rpcDuration = rpcDuration
 
 #------------------
 
