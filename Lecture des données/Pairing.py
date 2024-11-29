@@ -1,10 +1,13 @@
 from datetime import datetime
 
 class Pairing:
+    
 
     def __init__(self, id, blockPeriod):
         self.id = id
         self.blockPeriod = blockPeriod
+        self.rpcDuration = None
+        self.racDuration = None
         ## add already start and end as class properties. 
         ## methods for verifiying if a date is inside of a block period. 
         ## find already the corresponding legs of a pairing.
