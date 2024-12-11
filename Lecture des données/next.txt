@@ -1,0 +1,14 @@
+two new columns at the display window:
+    id and name of the activities
+Add at all classes:
+    racDuration (repos)
+    rpcDuration (repos)
+Containeraizing of the reader 
+
+
+Après:
+    des Algos d'Affectation (3 colouring graph): juste les pilotes versus les rotation/réserves qui restent
+        But: pas de superposition, etc...
+
+YT: <<À la decouverte des graphes>> https://www.youtube.com/watch?v=_izqESKJgP8
+
