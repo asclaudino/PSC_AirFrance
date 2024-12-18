@@ -1,5 +1,5 @@
 import json
-import pandas as pd
+#import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 from datetime import timedelta
@@ -12,6 +12,7 @@ from IndividualAssignment import IndividualAssignment
 from Pilot import Pilot
 from readerClass import readerClass
 from Tasks import StandByTask, PairingTask
+from Tasks import GroundActivityTask
 
 
 with open('Ressources/Export20PN.xml.json', 'r') as file:
@@ -56,3 +57,24 @@ for standby_task in standby_data:
                 standby_tasks.append(task)
 
 print(len(standby_tasks))
+
+GroundActivity_data = data.get('EasyData').get('Activities').get('GroundActivity')
+GroundActivity_tasks = []
+for GroundActivity_task in GroundActivity_data :
+    ground_activity_number = GroundActivity_task.get('activityNumber')
+    id = GroundActivity_task.get('id')
+    block_period = GroundActivity_task.get('@blockPeriod')
+    if GroundActivity_task.get('Booking'):  
+        for booking in GroundActivity_task.get('Booking'):
+            type = booking.get('@requiredCode')
+            nb_min = int(booking.get('@nbMin'))
+            if nb_min > 0 :
+                for i in range(int(booking.get('@nbMin'))):
+                    task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
+                    GroundActivity_tasks.append(task)
+
+print(len(GroundActivity_tasks))
+   
+
+
+
