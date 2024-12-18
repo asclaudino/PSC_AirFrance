@@ -11,12 +11,33 @@ from Standby import Standby
 from IndividualAssignment import IndividualAssignment
 from Pilot import Pilot
 from readerClass import readerClass
-from Tasks import StandByTask
+from Tasks import StandByTask, PairingTask
 
 
 with open('Ressources/Export20PN.xml.json', 'r') as file:
      data = json.load(file)
      
+
+
+
+pairing_data = data.get('EasyData').get('Activities').get('Pairing')
+pairings_tasks = []
+
+for pairing_task in pairing_data:
+    pairing_number = pairing_task.get('@pairingNumber')
+    id = pairing_task.get('@id')
+    block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+    if(pairing_task.get('Booking')):
+        for booking in pairing_task.get('Booking'):
+            if not booking: continue
+            type = booking.get('@requiredCode')
+            nb_min = int(booking.get('@nbMin'))
+            if nb_min > 0 :
+                for i in range(int(booking.get('@nbMin'))):
+                    task = PairingTask(pairing_number,id,type,False,block_period)
+                    pairings_tasks.append(task)
+
+print(len(pairings_tasks))
 
 standby_data = data.get('EasyData').get('Activities').get('Standby')
 
