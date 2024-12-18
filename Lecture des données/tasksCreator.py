@@ -56,24 +56,38 @@ for standby_task in standby_data:
                 task = StandByTask(standby_number,id,type,False,block_period)
                 standby_tasks.append(task)
 
-print(len(standby_tasks))
+print(len(standby_tasks), 'standby')
 
-GroundActivity_data = data.get('EasyData').get('Activities').get('GroundActivity')
-GroundActivity_tasks = []
-for GroundActivity_task in GroundActivity_data :
-    ground_activity_number = GroundActivity_task.get('activityNumber')
-    id = GroundActivity_task.get('id')
-    block_period = GroundActivity_task.get('@blockPeriod')
-    if GroundActivity_task.get('Booking'):  
-        for booking in GroundActivity_task.get('Booking'):
-            type = booking.get('@requiredCode')
-            nb_min = int(booking.get('@nbMin'))
+ground_activity_data = data.get('EasyData').get('Activities').get('GroundActivity')
+ground_activity_tasks = []
+
+for ground_activity_task in ground_activity_data :
+    ground_activity_number = ground_activity_task.get('activityNumber')
+    id = ground_activity_task.get('id')
+    block_period = ground_activity_task.get('@blockPeriod')
+    #print(ground_activity_task.get('Booking'))
+    bookings = ground_activity_task.get('Booking')
+    #print(bookings)
+    if bookings:  
+        ##bookings = json.loads(str(ground_activity_task.get('Booking')))
+        if isinstance(bookings,list):
+            for booking in bookings:
+                type = booking.get('@requiredCode')
+                nb_min = int(booking.get('@nbMin'))
+                if nb_min > 0 :
+                    for i in range(int(booking.get('@nbMin'))):
+                        task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
+                        ground_activity_tasks.append(task)
+        else:
+            type = booking['@requiredCode']
+            nb_min = int(booking['@nbMin'])
             if nb_min > 0 :
-                for i in range(int(booking.get('@nbMin'))):
+                for i in range(int(booking['@nbMin'])):
                     task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
-                    GroundActivity_tasks.append(task)
-
-print(len(GroundActivity_tasks))
+                    ground_activity_tasks.append(task)
+                    
+print(len(ground_activity_tasks))
+print(ground_activity_tasks[0])
    
 
 

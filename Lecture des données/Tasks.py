@@ -9,6 +9,16 @@ class PairingTask:
         self.filled = filled
         self.block_period = block_period    
 
+    def __str__(self):
+        return (
+            f"PairingTask(\n"
+            f"  Pairing Number: {self.pairing_number}\n"
+            f"  ID: {self.id}\n"
+            f"  Type Place: {self.type_place}\n"
+            f"  Filled: {self.filled}\n"
+            f"  Block Period: {self.block_period}\n"
+            f")"
+        )
 
 class StandByTask:
     
@@ -20,6 +30,17 @@ class StandByTask:
         self.filled = filled
         self.block_period = block_period    
         
+    def __str__(self):
+        return (
+            f"StandByTask(\n"
+            f"  Standby Number: {self.standby_number}\n"
+            f"  ID: {self.id}\n"
+            f"  Type Place: {self.type_place}\n"
+            f"  Filled: {self.filled}\n"
+            f"  Block Period: {self.block_period}\n"
+            f")"
+        )
+        
 class GroundActivityTask:
     
     def __init__(self, ground_activity_number: str, id: str, type_place: str, filled: bool, block_period: str):
@@ -29,3 +50,14 @@ class GroundActivityTask:
         self.type_place = type_place
         self.filled = filled
         self.block_period = block_period    
+    
+    def __str__(self):
+        return (
+            f"GroundActivityTask(\n"
+            f"  GroundActivity Number: {self.ground_activity_number}\n"
+            f"  ID: {self.id}\n"
+            f"  Type Place: {self.type_place}\n"
+            f"  Filled: {self.filled}\n"
+            f"  Block Period: {self.block_period}\n"
+            f")"
+        )
