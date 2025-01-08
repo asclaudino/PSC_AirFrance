@@ -1,4 +1,14 @@
 
+from datetime import datetime
+
+
+def parse_block_period(block_period):
+        if block_period:
+            start_str, end_str = block_period.split(';')
+            start = datetime.strptime(start_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+            end = datetime.strptime(end_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+            return start, end
+        return None, None
 class PairingTask:
     
     def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str):
@@ -7,8 +17,10 @@ class PairingTask:
         self.id = id
         self.type_place = type_place
         self.filled = filled
-        self.block_period = block_period    
-
+        self.block_period = block_period  
+        self.start, self.end = parse_block_period(block_period)  
+        
+    
     def __str__(self):
         return (
             f"PairingTask(\n"
@@ -17,8 +29,12 @@ class PairingTask:
             f"  Type Place: {self.type_place}\n"
             f"  Filled: {self.filled}\n"
             f"  Block Period: {self.block_period}\n"
+            f"  Start: {self.start}\n"
+            f"  End: {self.end}\n"
             f")"
         )
+        
+
 
 class StandByTask:
     
@@ -29,6 +45,7 @@ class StandByTask:
         self.type_place = type_place
         self.filled = filled
         self.block_period = block_period    
+        self.start, self.end = parse_block_period(block_period) 
         
     def __str__(self):
         return (
@@ -38,8 +55,11 @@ class StandByTask:
             f"  Type Place: {self.type_place}\n"
             f"  Filled: {self.filled}\n"
             f"  Block Period: {self.block_period}\n"
+            f"  Start: {self.start}\n"
+            f"  End: {self.end}\n"
             f")"
         )
+
         
 class GroundActivityTask:
     
@@ -49,7 +69,8 @@ class GroundActivityTask:
         self.id = id
         self.type_place = type_place
         self.filled = filled
-        self.block_period = block_period    
+        self.block_period = block_period  
+        self.start, self.end = parse_block_period(block_period)   
     
     def __str__(self):
         return (
@@ -59,5 +80,25 @@ class GroundActivityTask:
             f"  Type Place: {self.type_place}\n"
             f"  Filled: {self.filled}\n"
             f"  Block Period: {self.block_period}\n"
+            f"  Start: {self.start}\n"
+            f"  End: {self.end}\n"
+            f")"
+        )
+   
+class IndividualAssignmentTask:
+    
+    def __init__(self, id: str,block_period: str):
+        
+        self.id = id
+        self.block_period = block_period  
+        self.start, self.end = parse_block_period(block_period)   
+    
+    def __str__(self):
+        return (
+            f"IndividualAssignmentTask(\n"
+            f"  ID: {self.id}\n"
+            f"  Block Period: {self.block_period}\n"
+            f"  Start: {self.start}\n"
+            f"  End: {self.end}\n"
             f")"
         )

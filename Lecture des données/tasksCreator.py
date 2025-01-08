@@ -14,81 +14,83 @@ from readerClass import readerClass
 from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 
-
-with open('Ressources/Export20PN.xml.json', 'r') as file:
-     data = json.load(file)
-     
-
+def generate_tasks_lists(): 
+    with open('Ressources/Export20PN.xml.json', 'r') as file:
+         data = json.load(file)
 
 
-pairing_data = data.get('EasyData').get('Activities').get('Pairing')
-pairings_tasks = []
 
-for pairing_task in pairing_data:
-    pairing_number = pairing_task.get('@pairingNumber')
-    id = pairing_task.get('@id')
-    block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
-    if(pairing_task.get('Booking')):
-        for booking in pairing_task.get('Booking'):
-            if not booking: continue
-            type = booking.get('@requiredCode')
-            nb_min = int(booking.get('@nbMin'))
-            if nb_min > 0 :
-                for i in range(int(booking.get('@nbMin'))):
-                    task = PairingTask(pairing_number,id,type,False,block_period)
-                    pairings_tasks.append(task)
 
-print(len(pairings_tasks))
+    pairing_data = data.get('EasyData').get('Activities').get('Pairing')
+    pairings_tasks = []
 
-standby_data = data.get('EasyData').get('Activities').get('Standby')
-
-standby_tasks = []
-
-for standby_task in standby_data:
-    standby_number = standby_task.get('@standbyNumber')
-    id = standby_task.get('@id')
-    block_period = standby_task.get('StandbyElements').get('@blockPeriod')
-    for booking in standby_task.get('Booking'):
-        type = booking.get('@requiredCode')
-        nb_min = int(booking.get('@nbMin'))
-        if nb_min > 0 :
-            for i in range(int(booking.get('@nbMin'))):
-                task = StandByTask(standby_number,id,type,False,block_period)
-                standby_tasks.append(task)
-
-print(len(standby_tasks), 'standby')
-
-ground_activity_data = data.get('EasyData').get('Activities').get('GroundActivity')
-ground_activity_tasks = []
-
-for ground_activity_task in ground_activity_data :
-    ground_activity_number = ground_activity_task.get('activityNumber')
-    id = ground_activity_task.get('id')
-    block_period = ground_activity_task.get('@blockPeriod')
-    #print(ground_activity_task.get('Booking'))
-    bookings = ground_activity_task.get('Booking')
-    #print(bookings)
-    if bookings:  
-        ##bookings = json.loads(str(ground_activity_task.get('Booking')))
-        if isinstance(bookings,list):
-            for booking in bookings:
+    for pairing_task in pairing_data:
+        pairing_number = pairing_task.get('@pairingNumber')
+        id = pairing_task.get('@id')
+        block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+        if(pairing_task.get('Booking')):
+            for booking in pairing_task.get('Booking'):
+                if not booking: continue
                 type = booking.get('@requiredCode')
                 nb_min = int(booking.get('@nbMin'))
                 if nb_min > 0 :
                     for i in range(int(booking.get('@nbMin'))):
+                        task = PairingTask(pairing_number,id,type,False,block_period)
+                        pairings_tasks.append(task)
+
+    #print(len(pairings_tasks))
+    #print(pairings_tasks[0])
+
+    standby_data = data.get('EasyData').get('Activities').get('Standby')
+
+    standby_tasks = []
+
+    for standby_task in standby_data:
+        standby_number = standby_task.get('@standbyNumber')
+        id = standby_task.get('@id')
+        block_period = standby_task.get('StandbyElements').get('@blockPeriod')
+        for booking in standby_task.get('Booking'):
+            type = booking.get('@requiredCode')
+            nb_min = int(booking.get('@nbMin'))
+            if nb_min > 0 :
+                for i in range(int(booking.get('@nbMin'))):
+                    task = StandByTask(standby_number,id,type,False,block_period)
+                    standby_tasks.append(task)
+
+    #print(len(standby_tasks), 'standby')
+    #print(standby_tasks[0])
+
+    ground_activity_data = data.get('EasyData').get('Activities').get('GroundActivity')
+    ground_activity_tasks = []
+
+    for ground_activity_task in ground_activity_data :
+        ground_activity_number = ground_activity_task.get('activityNumber')
+        id = ground_activity_task.get('id')
+        block_period = ground_activity_task.get('@blockPeriod')
+        #print(ground_activity_task.get('Booking'))
+        bookings = ground_activity_task.get('Booking')
+        #print(bookings)
+        if bookings:  
+            ##bookings = json.loads(str(ground_activity_task.get('Booking')))
+            if isinstance(bookings,list):
+                for booking in bookings:
+                    type = booking.get('@requiredCode')
+                    nb_min = int(booking.get('@nbMin'))
+                    if nb_min > 0 :
+                        for i in range(int(booking.get('@nbMin'))):
+                            task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
+                            ground_activity_tasks.append(task)
+            else:
+                type = booking['@requiredCode']
+                nb_min = int(booking['@nbMin'])
+                if nb_min > 0 :
+                    for i in range(int(booking['@nbMin'])):
                         task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
                         ground_activity_tasks.append(task)
-        else:
-            type = booking['@requiredCode']
-            nb_min = int(booking['@nbMin'])
-            if nb_min > 0 :
-                for i in range(int(booking['@nbMin'])):
-                    task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
-                    ground_activity_tasks.append(task)
-                    
-print(len(ground_activity_tasks))
-print(ground_activity_tasks[0])
-   
 
+    #print(len(ground_activity_tasks))
+    #print(ground_activity_tasks[0])
+   
+    return pairings_tasks, ground_activity_tasks, standby_tasks
 
 
