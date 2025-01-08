@@ -11,6 +11,7 @@ from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 from Tasks import IndividualAssignmentTask
 
+
 class Roster:
     
     def __init__(self, crew_type: str, 
@@ -20,7 +21,8 @@ class Roster:
                  individual_tasks: str,
                  pairings_tasks:  str,
                  fcSpouseNumber: str, 
-                 fcNumber: str):
+                 fcNumber: str, 
+                 all_pairings: dict):
         self.crew_type = crew_type
         self.assignments = assignments
         self.fcSpouseNumber = fcSpouseNumber
@@ -29,7 +31,7 @@ class Roster:
         self.standby_tasks = []
         self.individual_tasks = []
         self.pairings_tasks = []
-        self.all_pairings = []
+        self.all_pairings = all_pairings
         self.tasksInitializer(ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks)
         
     def __str__(self):
@@ -47,6 +49,7 @@ class Roster:
         
     def tasksInitializer(self, ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks):
         
+
         if individual_tasks:
              if isinstance(individual_tasks, list):
                 for task in individual_tasks:
@@ -97,8 +100,8 @@ class Roster:
                     #print(task)
                     pairing_number = task.get("@activityId")
                     id = task.get('@id')
-                    #block_period = task.get("Elements").get('@blockPeriod')
-                    new_pa = PairingTask(pairing_number,id,'',True,'')
+                    block_period = self.all_pairings[pairing_number].blockPeriod
+                    new_pa = PairingTask(pairing_number,id,'',True,block_period)
                     self.pairings_tasks.append(new_pa)
             else:
                 #new_ground_activities_tasks = ground_activities_tasks.replace('@','')
