@@ -76,7 +76,7 @@ class Roster:
                 })
         if len(self.standby_tasks) > 0:
             for task in self.standby_tasks:
-                print(task.standby_number)
+                #print(task.standby_number)
                 standby = self.all_standby.get(task.standby_number)
                 start, end = standby.start, standby.end
                 self.block_periods.append({

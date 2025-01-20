@@ -36,7 +36,7 @@ def generate_tasks_lists():
                 nb_min = int(booking.get('@nbMin'))
                 if nb_min > 0 :
                     for i in range(int(booking.get('@nbMin'))):
-                        task = PairingTask(pairing_number,id,type,False,block_period)
+                        task = PairingTask(pairing_number,id,type,False,block_period, i+1, nb_min)
                         pairings_tasks.append(task)
 
 
@@ -75,16 +75,20 @@ def generate_tasks_lists():
                     nb_min = int(booking.get('@nbMin'))
                     if nb_min > 0 :
                         for i in range(int(booking.get('@nbMin'))):
-                            task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
+                            task = GroundActivityTask(ground_activity_number,id,type,False,block_period,i+1, nb_min)
                             ground_activity_tasks.append(task)
             else:
-                type = booking['@requiredCode']
-                nb_min = int(booking['@nbMin'])
+                type = bookings['@requiredCode']
+                nb_min = int(bookings['@nbMin'])
                 if nb_min > 0 :
-                    for i in range(int(booking['@nbMin'])):
-                        task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
+                    for i in range(int(bookings['@nbMin'])):
+                        task = GroundActivityTask(ground_activity_number,id,type,False,block_period,i+1, nb_min)
                         ground_activity_tasks.append(task)
-
+        else:
+            task = GroundActivityTask(ground_activity_number,id,'',False,block_period)
+            ground_activity_tasks.append(task)
+        
+            
    
     return pairings_tasks, ground_activity_tasks, standby_tasks
 

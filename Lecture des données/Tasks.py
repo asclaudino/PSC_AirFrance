@@ -11,13 +11,16 @@ def parse_block_period(block_period):
         return None, None
 class PairingTask:
     
-    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str):
+    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, place_number=1, total_places=1):
         
         self.pairing_number = pairing_number
         self.id = id
         self.type_place = type_place
         self.filled = filled
         self.block_period = block_period  
+        self.place_number = place_number
+        self.total_places = total_places
+        self.was_assigned_by_algo = False
         self.start, self.end = parse_block_period(block_period)  
         
     
@@ -63,13 +66,16 @@ class StandByTask:
         
 class GroundActivityTask:
     
-    def __init__(self, ground_activity_number: str, id: str, type_place: str, filled: bool, block_period: str):
+    def __init__(self, ground_activity_number: str, id: str, type_place: str, filled: bool, block_period: str,place_number=1, total_places=1):
         
         self.ground_activity_number = ground_activity_number
         self.id = id
         self.type_place = type_place
         self.filled = filled
         self.block_period = block_period  
+        self.place_number = place_number
+        self.total_places = total_places
+        self.was_assigned_by_algo = False
         self.start, self.end = parse_block_period(block_period)   
     
     def __str__(self):
