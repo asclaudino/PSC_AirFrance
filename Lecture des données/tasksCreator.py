@@ -28,6 +28,7 @@ def generate_tasks_lists():
         pairing_number = pairing_task.get('@pairingNumber')
         id = pairing_task.get('@id')
         block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+        
         if(pairing_task.get('Booking')):
             for booking in pairing_task.get('Booking'):
                 if not booking: continue
@@ -38,15 +39,14 @@ def generate_tasks_lists():
                         task = PairingTask(pairing_number,id,type,False,block_period)
                         pairings_tasks.append(task)
 
-    #print(len(pairings_tasks))
-    #print(pairings_tasks[0])
+
 
     standby_data = data.get('EasyData').get('Activities').get('Standby')
 
     standby_tasks = []
 
     for standby_task in standby_data:
-        standby_number = standby_task.get('@standbyNumber')
+        standby_number = standby_task.get('@id')
         id = standby_task.get('@id')
         block_period = standby_task.get('StandbyElements').get('@blockPeriod')
         for booking in standby_task.get('Booking'):
@@ -57,21 +57,18 @@ def generate_tasks_lists():
                     task = StandByTask(standby_number,id,type,False,block_period)
                     standby_tasks.append(task)
 
-    #print(len(standby_tasks), 'standby')
-    #print(standby_tasks[0])
+
 
     ground_activity_data = data.get('EasyData').get('Activities').get('GroundActivity')
     ground_activity_tasks = []
 
     for ground_activity_task in ground_activity_data :
-        ground_activity_number = ground_activity_task.get('activityNumber')
-        id = ground_activity_task.get('id')
+        ground_activity_number = ground_activity_task.get('@activityNumber')
+        id = ground_activity_task.get('@id')
         block_period = ground_activity_task.get('@blockPeriod')
-        #print(ground_activity_task.get('Booking'))
         bookings = ground_activity_task.get('Booking')
-        #print(bookings)
+        
         if bookings:  
-            ##bookings = json.loads(str(ground_activity_task.get('Booking')))
             if isinstance(bookings,list):
                 for booking in bookings:
                     type = booking.get('@requiredCode')
@@ -88,8 +85,6 @@ def generate_tasks_lists():
                         task = GroundActivityTask(ground_activity_number,id,type,False,block_period)
                         ground_activity_tasks.append(task)
 
-    #print(len(ground_activity_tasks))
-    #print(ground_activity_tasks[0])
    
     return pairings_tasks, ground_activity_tasks, standby_tasks
 

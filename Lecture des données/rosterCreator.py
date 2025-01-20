@@ -16,11 +16,17 @@ from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 from Roster import Roster
 from allPairings import all_pairings
+from tasksCreator import generate_tasks_lists
+
 
 
 def generate_rosters_list():
     
     all_pairings_dict = all_pairings()
+    _, _, standby_tasks = generate_tasks_lists()
+    standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
+
+
     
     with open('Ressources/Export20PN.xml.json', 'r') as file:
          data = json.load(file)
@@ -38,7 +44,7 @@ def generate_rosters_list():
         pairings_assignment = roster.get("Assignments").get("PairingAssignment", None)
         fcNumber = roster.get("CockpitCrew").get("@fcNumber")
         fcSpouseNumber = roster.get("CockpitCrew").get("@fcSpouseNumber")
-        new_roster = Roster(crew_type, assignments,ground_activity_assignment, standby_assignment,individual_assignment, pairings_assignment, fcSpouseNumber,fcNumber, all_pairings_dict)
+        new_roster = Roster(crew_type, assignments,ground_activity_assignment, standby_assignment,individual_assignment, pairings_assignment, fcSpouseNumber,fcNumber, all_pairings_dict, standby_tasks_dict)
         rosters_list.append(new_roster)
 
     #print(rosters_list[0])
