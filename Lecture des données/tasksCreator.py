@@ -54,7 +54,7 @@ def generate_tasks_lists():
             nb_min = int(booking.get('@nbMin'))
             if nb_min > 0 :
                 for i in range(int(booking.get('@nbMin'))):
-                    task = StandByTask(standby_number,id,type,False,block_period)
+                    task = StandByTask(standby_number,id,type,False,block_period,i+1, nb_min)
                     standby_tasks.append(task)
 
 

@@ -2,10 +2,14 @@ from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
 
+###TODO restraindre à juin 2024
+####TODO Enlever les GA
+##TODO Conter le #rotations déjà affectés // #rotations à placer // #analyse theorique du fichier d'entré (nombres de jours libres / durée des rotations).
+
 
 #all tasks that should been atributed (or not) 
 pairings_tasks, ground_activity_tasks, standby_tasks = generate_tasks_lists()
-print(len(ground_activity_tasks), ground_activity_tasks[0], ground_activity_tasks[1])
+#print(len(ground_activity_tasks), ground_activity_tasks[0], ground_activity_tasks[1])
 ground_tasks_dict   = {task.ground_activity_number: task for task in ground_activity_tasks}
 pairings_tasks_dict = {task.id : task for task in pairings_tasks}
 standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
@@ -14,10 +18,7 @@ standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
 rosters = generate_rosters_list()
 
 
-#DONE # TODO GO THROUGH ALL ROSTERS AND MARK THE RESPECTIVE TASK IN pairings_tasks, etc... WITH FILLED = TRUE 
 
-# print(rosters[0])
-# print(standby_tasks[1])
 
 for roster in rosters:
     
@@ -57,7 +58,6 @@ all_pairings_dict = all_pairings()
 
 
 
-#DONE ######TODO CREATE THE SORTED ALL BLOCK PERIODS IN THE ROSTER CLASS.
 
 def test_if_task_fits(first_task, second_task, new_task) -> bool:
     #print(first_task, second_task, new_task)
@@ -68,7 +68,6 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
 
 
 for pairing in pairings_tasks:
-    #print('entrei na pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
     flag = False
     if not pairing.filled:
         for roster in rosters: 
@@ -77,6 +76,8 @@ for pairing in pairings_tasks:
                     'start': pairing.start,
                     'end': pairing.end
                 }
+                # if pos < len(roster.block_periods)-1:
+                #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
                 if  pos < len(roster.block_periods)-1 \
                     and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
                     and roster.crew_type == pairing.type_place:
@@ -99,19 +100,20 @@ for pairing in pairings_tasks:
 print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings_tasks) - pairings_assigned_by_algo)
 
 
-
+ 
 for ga_task in ground_activity_tasks:
     #print('entrei na ground_activity_task ', ga_task.ground_activity_number, 'type: ', ga_task.type_place, ' place number: ', ga_task.place_number, ' out of: ', ga_task.total_places)
     flag = False
     if not ga_task.filled:
         for roster in rosters: 
             for (pos,block_period) in enumerate(roster.block_periods):
-                print(ga_task)
+                #print(ga_task)
                 new_task = {
                     'start': ga_task.start,
                     'end': ga_task.end
                 }
-                if  pos < len(roster.block_periods)-1 \
+                if  new_task['start'] and new_task['end'] \
+                    and pos < len(roster.block_periods)-1 \
                     and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
                     and roster.crew_type == ga_task.type_place:
                     #print(pos)
@@ -129,8 +131,39 @@ for ga_task in ground_activity_tasks:
 ga_assigned_by_algo = 0
 for ga_task in ground_activity_tasks:
     if ga_task.was_assigned_by_algo: ga_assigned_by_algo+=1
-print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(pairings_tasks) - ga_assigned_by_algo)
-#and so on for ground_activity_tasks and stand_by_tasks
+print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
 
+
+
+
+for standby_task in standby_tasks:
+    flag = False
+    if not standby_task.filled:
+        for roster in rosters: 
+            for (pos,block_period) in enumerate(roster.block_periods):
+                new_task = {
+                    'start': standby_task.start,
+                    'end': standby_task.end
+                }
+                if  new_task['start'] and new_task['end'] \
+                    and pos < len(roster.block_periods)-1 \
+                    and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
+                    and roster.crew_type == standby_task.type_place:
+                    #print(pos)
+                    #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
+                    roster.block_periods.append(block_period)
+                    roster.block_periods.sort(key=lambda block_period: block_period['start'])
+                    roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
+                    standby_task.filled = True
+                    standby_task.was_assigned_by_algo = True
+                    flag = True
+                    break
+            if flag: 
+                break
             
+standby_assigned_by_algo = 0
+for standby_task in standby_tasks:
+    if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
+print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
+
 

@@ -41,13 +41,16 @@ class PairingTask:
 
 class StandByTask:
     
-    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str):
+    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str,place_number=1, total_places=1):
         
         self.standby_number = standby_number
         self.id = id
         self.type_place = type_place
         self.filled = filled
-        self.block_period = block_period    
+        self.block_period = block_period   
+        self.place_number = place_number
+        self.total_places = total_places
+        self.was_assigned_by_algo = False 
         self.start, self.end = parse_block_period(block_period) 
         
     def __str__(self):
