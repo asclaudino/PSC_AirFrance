@@ -1,3 +1,5 @@
+import csv
+from datetime import datetime
 from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
@@ -191,3 +193,57 @@ print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_ta
 print(count_rotations, count_standby)
 print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
 print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
+
+for roster in rosters:
+    roster.pairings_tasks = sorted(roster.pairings_tasks, key = lambda task: task.start)
+    roster.standby_tasks = sorted(roster.standby_tasks, key = lambda task: task.start or datetime.max)
+    roster.individual_tasks = sorted(roster.individual_tasks, key = lambda task: task.start or datetime.max)
+    
+for roster in rosters:
+    planning = []
+    for pairing in roster.pairings_tasks:
+        task_pairing = {
+            'roster_id': roster.fcNumber,
+            'type': 'pairing_assignment',
+            'id': pairing.id,
+            'start': pairing.start,
+            'end': pairing.end
+        }
+        planning.append(task_pairing)
+    for standby in roster.standby_tasks:
+        task_standby = {
+            'roster_id': roster.fcNumber,
+            'type': 'standby_assignment',
+            'id': standby.id,
+            'start': standby.start,
+            'end': standby.end
+        }
+        planning.append(task_standby)
+    for individual in roster.individual_tasks:
+        task_individual = {
+            'roster_id': roster.fcNumber,
+            'type': 'individual_assignment',
+            'id': individual.id,
+            'start': individual.start,
+            'end': individual.end
+        }
+    planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
+
+    filename = f"roster_{roster.fcNumber}.csv"
+    
+    # Define CSV column headers
+    fieldnames = ['roster_id', 'type', 'id', 'start', 'end']
+    # Write to CSV file
+    with open(filename, mode="w", newline="") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        # Write the header row
+        writer.writeheader()
+        # Write data rows
+        writer.writerows(planning)
+    print(f"CSV file '{filename}' has been created successfully.")
+    
+
+
+
+
+        
