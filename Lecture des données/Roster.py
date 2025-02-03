@@ -84,7 +84,7 @@ class Roster:
                     'end': end
                 })
 
-        self.block_periods.sort(key=lambda block_period: block_period['start'])
+        self.block_periods.sort(key=lambda block_period: block_period['start'] if block_period['start'] is not None else datetime.max)
 
                 
     
@@ -128,8 +128,11 @@ class Roster:
                 for task in pairings_tasks:
                     pairing_number = task.get("@activityId")
                     id = task.get('@id')
-                    block_period = self.all_pairings[pairing_number].blockPeriod
-                    new_pa = PairingTask(pairing_number,id,'',True,block_period)
+                    if self.all_pairings[pairing_number]:
+                        block_period = self.all_pairings[pairing_number].blockPeriod
+                    else:
+                        block_period = "2024-01-01T06:30:00.000Z;2024-01-02T04:36:00.000Z"
+                    new_pa = PairingTask(pairing_number,id,'',True,block_period, '')
                     self.pairings_tasks.append(new_pa)
             else:
   
@@ -145,14 +148,14 @@ class Roster:
                     standby_number = task.get("@activityId")
                     id = task.get('@id')
                     #block_period = task.get("Elements").get('@blockPeriod')
-                    new_stb = StandByTask(standby_number,id,'',True,'')
+                    new_stb = StandByTask(standby_number,id,'',True,'', '')
                     self.standby_tasks.append(new_stb)
             else:
                     
                 standby_activity_number = standby_tasks.get("@activityId")
                 id = standby_tasks.get('@id')
                 #block_period = standby_tasks.get("Elements").get('@blockPeriod')
-                new_stb = StandByTask(standby_activity_number,id,'',True,'')
+                new_stb = StandByTask(standby_activity_number,id,'',True,'','')
                 self.standby_tasks.append(new_stb)
                 
 

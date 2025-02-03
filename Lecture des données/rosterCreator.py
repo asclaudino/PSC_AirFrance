@@ -36,7 +36,12 @@ def generate_rosters_list():
     rosters_list = []
 
     for roster in rosters_data: 
-        crew_type = roster.get("CockpitCrew").get("COTypeRateQualification").get("@specialityCode")
+        if isinstance(roster.get("CockpitCrew").get("COTypeRateQualification"), list):
+            qualifications = roster.get("CockpitCrew").get("COTypeRateQualification")
+            #len = len(qualifications)
+            crew_type = qualifications[-1].get("@specialityCode")
+        else:
+            crew_type = roster.get("CockpitCrew").get("COTypeRateQualification").get("@specialityCode")
         assignments = roster.get("Assignments")
         ground_activity_assignment = roster.get("Assignments").get("GroundActivityAssignment", None)
         standby_assignment = roster.get("Assignments").get("StandbyAssignment", None)

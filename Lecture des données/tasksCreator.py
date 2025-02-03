@@ -28,6 +28,7 @@ def generate_tasks_lists():
         pairing_number = pairing_task.get('@pairingNumber')
         id = pairing_task.get('@id')
         block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
+        aircraft_type = pairing_task.get('@listAircraftType')
         
         if(pairing_task.get('Booking')):
             for booking in pairing_task.get('Booking'):
@@ -36,7 +37,7 @@ def generate_tasks_lists():
                 nb_min = int(booking.get('@nbMin'))
                 if nb_min > 0 :
                     for i in range(int(booking.get('@nbMin'))):
-                        task = PairingTask(pairing_number,id,type,False,block_period, i+1, nb_min)
+                        task = PairingTask(pairing_number,id,type,False,block_period,aircraft_type, i+1, nb_min)
                         pairings_tasks.append(task)
 
 
@@ -49,12 +50,14 @@ def generate_tasks_lists():
         standby_number = standby_task.get('@id')
         id = standby_task.get('@id')
         block_period = standby_task.get('StandbyElements').get('@blockPeriod')
+        aircraft_type = standby_task.get('@listAircraftType')
+
         for booking in standby_task.get('Booking'):
             type = booking.get('@requiredCode')
             nb_min = int(booking.get('@nbMin'))
             if nb_min > 0 :
                 for i in range(int(booking.get('@nbMin'))):
-                    task = StandByTask(standby_number,id,type,False,block_period,i+1, nb_min)
+                    task = StandByTask(standby_number,id,type,False,block_period,aircraft_type,i+1, nb_min)
                     standby_tasks.append(task)
 
 

@@ -11,7 +11,7 @@ def parse_block_period(block_period):
         return None, None
 class PairingTask:
     
-    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, place_number=1, total_places=1):
+    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, aircraft_type: str, place_number=1, total_places=1):
         
         self.pairing_number = pairing_number
         self.id = id
@@ -21,6 +21,7 @@ class PairingTask:
         self.place_number = place_number
         self.total_places = total_places
         self.was_assigned_by_algo = False
+        self.aircraft_type = aircraft_type
         self.start, self.end = parse_block_period(block_period)  
         
     
@@ -30,6 +31,7 @@ class PairingTask:
             f"  Pairing Number: {self.pairing_number}\n"
             f"  ID: {self.id}\n"
             f"  Type Place: {self.type_place}\n"
+            f"  Aircraft Type: {self.aircraft_type}\n"
             f"  Filled: {self.filled}\n"
             f"  Block Period: {self.block_period}\n"
             f"  Start: {self.start}\n"
@@ -41,7 +43,7 @@ class PairingTask:
 
 class StandByTask:
     
-    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str,place_number=1, total_places=1):
+    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str,aircraft_type: str,place_number=1, total_places=1):
         
         self.standby_number = standby_number
         self.id = id
@@ -51,6 +53,7 @@ class StandByTask:
         self.place_number = place_number
         self.total_places = total_places
         self.was_assigned_by_algo = False 
+        self.aircraft_type = aircraft_type
         self.start, self.end = parse_block_period(block_period) 
         
     def __str__(self):
@@ -59,6 +62,7 @@ class StandByTask:
             f"  Standby Number: {self.standby_number}\n"
             f"  ID: {self.id}\n"
             f"  Type Place: {self.type_place}\n"
+            f"  Aircraft Type: {self.aircraft_type}\n"
             f"  Filled: {self.filled}\n"
             f"  Block Period: {self.block_period}\n"
             f"  Start: {self.start}\n"
