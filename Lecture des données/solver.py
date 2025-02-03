@@ -58,18 +58,36 @@ all_pairings_dict = all_pairings()
 
 
 
-
 def test_if_task_fits(first_task, second_task, new_task) -> bool:
-    #print(first_task, second_task, new_task)
-    return first_task['end'] < new_task['start'] and new_task['end'] < second_task['start']
+    
+    # print(first_task, second_task, new_task)
+    # print('\n')
+    # if first_task['end'] < new_task['start'] \
+    #         and new_task['end'] < second_task['start'] \
+    #         and new_task['start'].month == 6 and new_task['end'].month == 6 \
+    #         and new_task['start'].year == 2024 and new_task['end'].year == 2024:
+    #             print(first_task, second_task, new_task)
+    #             print(first_task['end'] < new_task['start'] \
+    #                 and new_task['end'] < second_task['start'] \
+    #                 and new_task['start'].month == 6 and new_task['end'].month == 6 \
+    #                 and new_task['start'].year == 2024 and new_task['end'].year == 2024)
+    if not new_task['start'] or not new_task['end']: return False
+    return first_task['end'] < new_task['start'] \
+           and new_task['end'] < second_task['start'] \
+           and new_task['start'].month == 6 and new_task['end'].month == 6 \
+           and new_task['start'].year == 2024 and new_task['end'].year == 2024
     
 #start of the real optmization algorithm
 
 
-
+count_rotations = 0
 for pairing in pairings_tasks:
     flag = False
-    if not pairing.filled:
+    if not pairing.filled and pairing.aircraft_type == '777':
+        if pairing.start.month == 6  \
+           and pairing.start.year == 2024 and pairing.end.year == 2024:
+            count_rotations += 1
+
         for roster in rosters: 
             for (pos,block_period) in enumerate(roster.block_periods):
                 new_task = {
@@ -78,18 +96,20 @@ for pairing in pairings_tasks:
                 }
                 # if pos < len(roster.block_periods)-1:
                 #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
-                if  pos < len(roster.block_periods)-1 \
-                    and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
+                if pos < len(roster.block_periods) - 1 \
+                    and test_if_task_fits(block_period, roster.block_periods[pos + 1], new_task) \
                     and roster.crew_type == pairing.type_place:
-                    #print(pos)
-                    #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
-                    roster.block_periods.append(block_period)
-                    roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                    roster.pairings_tasks.append(pairing) #check the format of pairing and the pairings_tasks in roster
-                    pairing.filled = True
-                    pairing.was_assigned_by_algo = True
-                    flag = True
-                    break
+                        # print(pos)
+                        # print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place,
+                        #       'place number: ', pairing.place_number, 'out of: ', pairing.total_places)
+                        roster.block_periods.append(new_task)
+                        roster.block_periods.sort(key=lambda block_period: block_period['start'])
+                        roster.pairings_tasks.append(pairing)  # Check the format of pairing and the pairings_tasks in roster
+                        pairing.filled = True
+                        pairing.was_assigned_by_algo = True
+                        flag = True
+                        break
+
             if flag: 
                 break
 
@@ -101,44 +121,46 @@ print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings
 
 
  
-for ga_task in ground_activity_tasks:
-    #print('entrei na ground_activity_task ', ga_task.ground_activity_number, 'type: ', ga_task.type_place, ' place number: ', ga_task.place_number, ' out of: ', ga_task.total_places)
-    flag = False
-    if not ga_task.filled:
-        for roster in rosters: 
-            for (pos,block_period) in enumerate(roster.block_periods):
-                #print(ga_task)
-                new_task = {
-                    'start': ga_task.start,
-                    'end': ga_task.end
-                }
-                if  new_task['start'] and new_task['end'] \
-                    and pos < len(roster.block_periods)-1 \
-                    and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
-                    and roster.crew_type == ga_task.type_place:
-                    #print(pos)
-                    #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
-                    roster.block_periods.append(block_period)
-                    roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                    roster.ground_activities_tasks.append(ga_task) #check the format of pairing and the pairings_tasks in roster
-                    ga_task.filled = True
-                    ga_task.was_assigned_by_algo = True
-                    flag = True
-                    break
-            if flag: 
-                break
+# for ga_task in ground_activity_tasks:
+#     #print('entrei na ground_activity_task ', ga_task.ground_activity_number, 'type: ', ga_task.type_place, ' place number: ', ga_task.place_number, ' out of: ', ga_task.total_places)
+#     flag = False
+#     if not ga_task.filled:
+#         for roster in rosters: 
+#             for (pos,block_period) in enumerate(roster.block_periods):
+#                 #print(ga_task)
+#                 new_task = {
+#                     'start': ga_task.start,
+#                     'end': ga_task.end
+#                 }
+#                 if  new_task['start'] and new_task['end'] \
+#                     and pos < len(roster.block_periods)-1 \
+#                     and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
+#                     and roster.crew_type == ga_task.type_place:
+#                     #print(pos)
+#                     #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
+#                     roster.block_periods.append(block_period)
+#                     roster.block_periods.sort(key=lambda block_period: block_period['start'])
+#                     roster.ground_activities_tasks.append(ga_task) #check the format of pairing and the pairings_tasks in roster
+#                     ga_task.filled = True
+#                     ga_task.was_assigned_by_algo = True
+#                     flag = True
+#                     break
+#             if flag: 
+#                 break
             
-ga_assigned_by_algo = 0
-for ga_task in ground_activity_tasks:
-    if ga_task.was_assigned_by_algo: ga_assigned_by_algo+=1
-print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
+# ga_assigned_by_algo = 0
+# for ga_task in ground_activity_tasks:
+#     if ga_task.was_assigned_by_algo: ga_assigned_by_algo+=1
+# print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
 
 
-
-
+count_standby = 0
 for standby_task in standby_tasks:
     flag = False
-    if not standby_task.filled:
+    if not standby_task.filled and standby_task.aircraft_type == '777':
+        if standby_task.start.month == 6  \
+           and standby_task.start.year == 2024 and standby_task.end.year == 2024:
+            count_standby += 1
         for roster in rosters: 
             for (pos,block_period) in enumerate(roster.block_periods):
                 new_task = {
@@ -151,7 +173,7 @@ for standby_task in standby_tasks:
                     and roster.crew_type == standby_task.type_place:
                     #print(pos)
                     #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
-                    roster.block_periods.append(block_period)
+                    roster.block_periods.append(new_task)
                     roster.block_periods.sort(key=lambda block_period: block_period['start'])
                     roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
                     standby_task.filled = True
@@ -166,4 +188,6 @@ for standby_task in standby_tasks:
     if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
 print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
 
-
+print(count_rotations, count_standby)
+print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
+print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
