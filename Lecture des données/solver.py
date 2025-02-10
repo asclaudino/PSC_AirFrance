@@ -11,6 +11,8 @@ from allPairings import all_pairings
 
 #all tasks that should been atributed (or not) 
 pairings_tasks, ground_activity_tasks, standby_tasks = generate_tasks_lists()
+
+
 #print(len(ground_activity_tasks), ground_activity_tasks[0], ground_activity_tasks[1])
 ground_tasks_dict   = {task.ground_activity_number: task for task in ground_activity_tasks}
 pairings_tasks_dict = {task.id : task for task in pairings_tasks}
@@ -79,7 +81,9 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
            and new_task['start'].month == 6 and new_task['end'].month == 6 \
            and new_task['start'].year == 2024 and new_task['end'].year == 2024
     
-#start of the real optmization algorithm
+    
+    
+# Start of the real optmization algorithm
 
 
 count_rotations = 0
@@ -198,7 +202,10 @@ for roster in rosters:
     roster.pairings_tasks = sorted(roster.pairings_tasks, key = lambda task: task.start)
     roster.standby_tasks = sorted(roster.standby_tasks, key = lambda task: task.start or datetime.max)
     roster.individual_tasks = sorted(roster.individual_tasks, key = lambda task: task.start or datetime.max)
-    
+
+
+## Affichage! 
+
 for roster in rosters:
     planning = []
     for pairing in roster.pairings_tasks:
