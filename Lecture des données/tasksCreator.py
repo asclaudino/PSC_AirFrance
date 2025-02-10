@@ -29,6 +29,9 @@ def generate_tasks_lists():
         id = pairing_task.get('@id')
         block_period = pairing_task.get('PairingValues').get('COPairingElements').get('@blockPeriod')
         aircraft_type = pairing_task.get('@listAircraftType')
+        racDuration = pairing_task.get('PairingValues').get('COPairingElements').get('@racDuration')
+        rpcDuration = pairing_task.get('PairingValues').get('COPairingElements').get('@rpcDuration')
+
         
         if(pairing_task.get('Booking')):
             for booking in pairing_task.get('Booking'):

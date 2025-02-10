@@ -9,9 +9,16 @@ def parse_block_period(block_period):
             end = datetime.strptime(end_str, "%Y-%m-%dT%H:%M:%S.%fZ")
             return start, end
         return None, None
+def parse_racDuration(racDuration):
+    origin = datetime(0,0,0)
+    if racDuration:
+        DurDate = datetime.strptime(racDuration,"P%YY%mM%dDT%HH%MM%S.%fS")
+        Duration = DurDate-origin
+
+
 class PairingTask:
     
-    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, aircraft_type: str, place_number=1, total_places=1):
+    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, aircraft_type: str, place_number=1, total_places=1, racDuration='', rpcDuration=''):
         
         self.pairing_number = pairing_number
         self.id = id
@@ -22,7 +29,10 @@ class PairingTask:
         self.total_places = total_places
         self.was_assigned_by_algo = False
         self.aircraft_type = aircraft_type
-        self.start, self.end = parse_block_period(block_period)  
+        self.start, self.end = parse_block_period(block_period)
+        self.racDuration = parse_racDuration(racDuration)
+        self.rpcDuration = parse_racDuration(rpcDuration)
+
         
     
     def __str__(self):
