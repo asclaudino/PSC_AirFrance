@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from typing import Optional
 
 
 def parse_block_period(block_period):
@@ -100,11 +101,12 @@ class GroundActivityTask:
    
 class IndividualAssignmentTask:
     
-    def __init__(self, id: str,block_period: str):
+    def __init__(self, id: str,block_period: str, was_assigned_by_algo: Optional[bool] = False):
         
         self.id = id
         self.block_period = block_period  
         self.start, self.end = parse_block_period(block_period)   
+        self.was_assigned_by_algo = was_assigned_by_algo 
     
     def __str__(self):
         return (
