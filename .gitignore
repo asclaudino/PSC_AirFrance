@@ -1,0 +1,12 @@
+# Ignore CSV files
+*.csv
+
+# Ignore XML files
+*.xml
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore JSON files
+*.json
