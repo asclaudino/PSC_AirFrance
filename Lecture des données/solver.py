@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
@@ -83,6 +83,25 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
 
     
 #start of the real optmization algorithm
+
+def checkDispoVacance(planning):
+    dispo_5 = []
+    dispo_6 = []
+    for i in range(0, len(planning)-1):
+        end_current = planning[i]['end']
+        start_next = planning[i+1]['start']
+        interval = start_next - end_current
+        if(interval >= timedelta(days=6)):
+            dispo_6.append(interval)
+        elif(interval >= timedelta(days=5)):
+            dispo_5.append(interval)
+    if not dispo_6.empty() and not dispo_5.empty():
+        return True
+    elif len(dispo_6 > 1):
+        return True
+    else:
+        return False
+
 
 
 count_rotations = 0
@@ -205,7 +224,12 @@ for roster in rosters:
     roster.pairings_tasks = sorted(roster.pairings_tasks, key = lambda task: task.start)
     roster.standby_tasks = sorted(roster.standby_tasks, key = lambda task: task.start or datetime.max)
     roster.individual_tasks = sorted(roster.individual_tasks, key = lambda task: task.start or datetime.max)
-    
+
+
+
+       
+            
+                
 for roster in rosters:
     planning = []
     for pairing in roster.pairings_tasks:
@@ -235,6 +259,7 @@ for roster in rosters:
             'end': individual.end
         }
     planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
+
 
     filename = f"roster_{roster.fcNumber}.csv"
     
