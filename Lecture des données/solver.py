@@ -76,9 +76,9 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
     if not new_task['start'] or not new_task['end']: return False
     return first_task['end'] < new_task['start'] \
            and new_task['end'] < second_task['start'] \
-           and new_task['start']-first_task['end'] > max(new_task['racDuration'],new_task['rpcDuration'])\
-           and second_task['start']-new_task['end'] > max(new_task['racDuration'],new_task['rpcDuration'])\
-           and new_task['start'].month == 6 and new_task['end'].month == 6\
+           and second_task['start'] >= new_task['rpcexactdate'] \
+           and new_task['racexactdate'] >= first_task['end'] \
+           and new_task['start'].month == 6 and new_task['end'].month == 6 \
            and new_task['start'].year == 2024 and new_task['end'].year == 2024
 
     
@@ -98,9 +98,10 @@ for pairing in pairings_tasks:
                 new_task = {
                     'start': pairing.start,
                     'end': pairing.end,
-                    'rpcDuration' : pairing.rpcDuration,
-                    'racDuartion' : pairing.racDuration
+                    'racexactdate': pairing.rac_exact_date,
+                    'rpcexactdate': pairing.rpc_exact_date
                 }
+                
                 # if pos < len(roster.block_periods)-1:
                 #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
                 if pos < len(roster.block_periods) - 1 \

@@ -1,6 +1,7 @@
 
-from datetime import datetime
-
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+import re
 
 def parse_block_period(block_period):
         if block_period:
@@ -9,12 +10,71 @@ def parse_block_period(block_period):
             end = datetime.strptime(end_str, "%Y-%m-%dT%H:%M:%S.%fZ")
             return start, end
         return None, None
-def parse_racDuration(racDuration):
-    origin = datetime(0,0,0)
-    if racDuration:
-        DurDate = datetime.strptime(racDuration,"P%YY%mM%dDT%HH%MM%S.%fS")
-        Duration = DurDate-origin
+    
+# def parse_racDuration(racDuration):
+#     origin = datetime(0,0,0)
+#     if racDuration:
+#         DurDate = datetime.strptime(racDuration,"P%YY%mM%dDT%HH%MM%S.%fS")
+#         Duration = DurDate-origin
+        
+def parse_duration(duration: str):
+    """
+    Parses an ISO 8601 duration string of the form:
+      "P{years}Y{months}M{days}DT{hours}H{minutes}M{seconds}S"
+    e.g. "P0Y0M1DT20H35M0.000S" and returns either a timedelta (if years and months are zero)
+    or a relativedelta (if years or months are nonzero).
+    """
+    pattern = (
+        r'P(?P<years>\d+)Y(?P<months>\d+)M(?P<days>\d+)D'
+        r'T(?P<hours>\d+)H(?P<minutes>\d+)M(?P<seconds>\d+(?:\.\d+)?)S'
+    )
+    if duration:
+        match = re.match(pattern, duration)
+    else: 
+        match = False
+        
+    if not match:
+        #raise ValueError("Invalid duration format: " + duration)
+        #print("Invalid duration format: ", duration)
+        return timedelta(0,0,0,0,0,0,0)
+    
+    years   = int(match.group('years'))
+    months  = int(match.group('months'))
+    days    = int(match.group('days'))
+    hours   = int(match.group('hours'))
+    minutes = int(match.group('minutes'))
+    seconds = float(match.group('seconds'))
+    
+    # Use timedelta if years and months are zero, otherwise use relativedelta
+    if years == 0 and months == 0:
+        return timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+    else:
+        return relativedelta(years=years, months=months, days=days,
+                             hours=hours, minutes=minutes, seconds=seconds)
 
+def subtract_duration_from_datetime(start_datetime, duration: str):
+    """
+    Subtracts the duration specified by `duration` from the given datetime `start_datetime`
+    and returns the resulting datetime.
+    """
+    #print(duration)
+    duration = parse_duration(duration)
+    if duration:
+        return start_datetime - duration
+    else: 
+        return start_datetime
+    
+def add_duration_to_datetime(start_datetime, duration: str):
+    """
+    Adds the duration specified by `duration` to the given datetime `start_datetime`
+    and returns the resulting datetime.
+    """
+    #print(duration)
+    duration = parse_duration(duration)
+    if duration:
+        return start_datetime + duration
+    else: 
+        return start_datetime
 
 class PairingTask:
     
@@ -30,8 +90,8 @@ class PairingTask:
         self.was_assigned_by_algo = False
         self.aircraft_type = aircraft_type
         self.start, self.end = parse_block_period(block_period)
-        self.racDuration = parse_racDuration(racDuration)
-        self.rpcDuration = parse_racDuration(rpcDuration)
+        self.rac_exact_date = subtract_duration_from_datetime(self.start, racDuration)
+        self.rpc_exact_date = add_duration_to_datetime(self.end, rpcDuration)
 
         
     

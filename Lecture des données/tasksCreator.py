@@ -40,7 +40,7 @@ def generate_tasks_lists():
                 nb_min = int(booking.get('@nbMin'))
                 if nb_min > 0 :
                     for i in range(int(booking.get('@nbMin'))):
-                        task = PairingTask(pairing_number,id,type,False,block_period,aircraft_type, i+1, nb_min)
+                        task = PairingTask(pairing_number,id,type,False,block_period,aircraft_type, i+1, nb_min, racDuration, rpcDuration)
                         pairings_tasks.append(task)
 
 
