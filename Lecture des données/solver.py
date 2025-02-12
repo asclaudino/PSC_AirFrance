@@ -73,6 +73,7 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
     #                 and new_task['end'] < second_task['start'] \
     #                 and new_task['start'].month == 6 and new_task['end'].month == 6 \
     #                 and new_task['start'].year == 2024 and new_task['end'].year == 2024)
+    #print(new_task)
     if not new_task['start'] or not new_task['end']: return False
     return first_task['end'] < new_task['start'] \
            and new_task['end'] < second_task['start'] \
@@ -181,44 +182,44 @@ print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings
 # print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
 
 
-count_standby = 0
-for standby_task in standby_tasks:
-    flag = False
-    if not standby_task.filled and standby_task.aircraft_type == '777':
-        if standby_task.start.month == 6  \
-           and standby_task.start.year == 2024 and standby_task.end.year == 2024:
-            count_standby += 1
-        for roster in rosters: 
-            for (pos,block_period) in enumerate(roster.block_periods):
-                new_task = {
-                    'start': standby_task.start,
-                    'end': standby_task.end
+# count_standby = 0
+# for standby_task in standby_tasks:
+#     flag = False
+#     if not standby_task.filled and standby_task.aircraft_type == '777':
+#         if standby_task.start.month == 6  \
+#            and standby_task.start.year == 2024 and standby_task.end.year == 2024:
+#             count_standby += 1
+#         for roster in rosters: 
+#             for (pos,block_period) in enumerate(roster.block_periods):
+#                 new_task = {
+#                     'start': standby_task.start,
+#                     'end': standby_task.end
                     
-                }
-                if  new_task['start'] and new_task['end'] \
-                    and pos < len(roster.block_periods)-1 \
-                    and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
-                    and roster.crew_type == standby_task.type_place:
-                    #print(pos)
-                    #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
-                    roster.block_periods.append(new_task)
-                    roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                    roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
-                    standby_task.filled = True
-                    standby_task.was_assigned_by_algo = True
-                    flag = True
-                    break
-            if flag: 
-                break
+#                 }
+#                 if  new_task['start'] and new_task['end'] \
+#                     and pos < len(roster.block_periods)-1 \
+#                     and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
+#                     and roster.crew_type == standby_task.type_place:
+#                     #print(pos)
+#                     #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
+#                     roster.block_periods.append(new_task)
+#                     roster.block_periods.sort(key=lambda block_period: block_period['start'])
+#                     roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
+#                     standby_task.filled = True
+#                     standby_task.was_assigned_by_algo = True
+#                     flag = True
+#                     break
+#             if flag: 
+#                 break
             
-standby_assigned_by_algo = 0
-for standby_task in standby_tasks:
-    if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
-print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
+# standby_assigned_by_algo = 0
+# for standby_task in standby_tasks:
+#     if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
+# print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
 
-print(count_rotations, count_standby)
-print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
-print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
+# print(count_rotations, count_standby)
+# print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
+# print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
 
 for roster in rosters:
     roster.pairings_tasks = sorted(roster.pairings_tasks, key = lambda task: task.start)
