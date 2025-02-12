@@ -239,7 +239,8 @@ for roster in rosters:
             'type': 'pairing_assignment',
             'id': pairing.id,
             'start': pairing.start,
-            'end': pairing.end
+            'end': pairing.end,
+            'was_assigned_via_algo': pairing.was_assigned_by_algo 
         }
         planning.append(task_pairing)
     for standby in roster.standby_tasks:
@@ -248,7 +249,8 @@ for roster in rosters:
             'type': 'standby_assignment',
             'id': standby.id,
             'start': standby.start,
-            'end': standby.end
+            'end': standby.end,
+            'was_assigned_via_algo': standby.was_assigned_by_algo
         }
         planning.append(task_standby)
     for individual in roster.individual_tasks:
@@ -257,7 +259,8 @@ for roster in rosters:
             'type': 'individual_assignment',
             'id': individual.id,
             'start': individual.start,
-            'end': individual.end
+            'end': individual.end,
+            'was_assigned_via_algo' : individual.was_assigned_by_algo
         }
     planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
 
@@ -265,7 +268,7 @@ for roster in rosters:
     filename = f"roster_{roster.fcNumber}.csv"
     
     # Define CSV column headers
-    fieldnames = ['roster_id', 'type', 'id', 'start', 'end']
+    fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
     # Write to CSV file
     with open(filename, mode="w", newline="") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
