@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
@@ -73,13 +73,36 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
     #                 and new_task['end'] < second_task['start'] \
     #                 and new_task['start'].month == 6 and new_task['end'].month == 6 \
     #                 and new_task['start'].year == 2024 and new_task['end'].year == 2024)
+    #print(new_task)
     if not new_task['start'] or not new_task['end']: return False
     return first_task['end'] < new_task['start'] \
            and new_task['end'] < second_task['start'] \
+           and second_task['start'] >= new_task['rpcexactdate'] \
+           and new_task['racexactdate'] >= first_task['end'] \
            and new_task['start'].month == 6 and new_task['end'].month == 6 \
            and new_task['start'].year == 2024 and new_task['end'].year == 2024
+
     
 #start of the real optmization algorithm
+
+def checkDispoVacance(planning):
+    dispo_5 = []
+    dispo_6 = []
+    for i in range(0, len(planning)-1):
+        end_current = planning[i]['end']
+        start_next = planning[i+1]['start']
+        interval = start_next - end_current
+        if(interval >= timedelta(days=6)):
+            dispo_6.append(interval)
+        elif(interval >= timedelta(days=5)):
+            dispo_5.append(interval)
+    if not dispo_6.empty() and not dispo_5.empty():
+        return True
+    elif len(dispo_6 > 1):
+        return True
+    else:
+        return False
+
 
 
 count_rotations = 0
@@ -94,8 +117,11 @@ for pairing in pairings_tasks:
             for (pos,block_period) in enumerate(roster.block_periods):
                 new_task = {
                     'start': pairing.start,
-                    'end': pairing.end
+                    'end': pairing.end,
+                    'racexactdate': pairing.rac_exact_date,
+                    'rpcexactdate': pairing.rpc_exact_date
                 }
+                
                 # if pos < len(roster.block_periods)-1:
                 #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
                 if pos < len(roster.block_periods) - 1 \
@@ -156,49 +182,55 @@ print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings
 # print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
 
 
-count_standby = 0
-for standby_task in standby_tasks:
-    flag = False
-    if not standby_task.filled and standby_task.aircraft_type == '777':
-        if standby_task.start.month == 6  \
-           and standby_task.start.year == 2024 and standby_task.end.year == 2024:
-            count_standby += 1
-        for roster in rosters: 
-            for (pos,block_period) in enumerate(roster.block_periods):
-                new_task = {
-                    'start': standby_task.start,
-                    'end': standby_task.end
-                }
-                if  new_task['start'] and new_task['end'] \
-                    and pos < len(roster.block_periods)-1 \
-                    and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
-                    and roster.crew_type == standby_task.type_place:
-                    #print(pos)
-                    #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
-                    roster.block_periods.append(new_task)
-                    roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                    roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
-                    standby_task.filled = True
-                    standby_task.was_assigned_by_algo = True
-                    flag = True
-                    break
-            if flag: 
-                break
+# count_standby = 0
+# for standby_task in standby_tasks:
+#     flag = False
+#     if not standby_task.filled and standby_task.aircraft_type == '777':
+#         if standby_task.start.month == 6  \
+#            and standby_task.start.year == 2024 and standby_task.end.year == 2024:
+#             count_standby += 1
+#         for roster in rosters: 
+#             for (pos,block_period) in enumerate(roster.block_periods):
+#                 new_task = {
+#                     'start': standby_task.start,
+#                     'end': standby_task.end
+                    
+#                 }
+#                 if  new_task['start'] and new_task['end'] \
+#                     and pos < len(roster.block_periods)-1 \
+#                     and test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) \
+#                     and roster.crew_type == standby_task.type_place:
+#                     #print(pos)
+#                     #print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place, ' place number: ', pairing.place_number, ' out of: ', pairing.total_places)
+#                     roster.block_periods.append(new_task)
+#                     roster.block_periods.sort(key=lambda block_period: block_period['start'])
+#                     roster.standby_tasks.append(standby_task) #check the format of pairing and the pairings_tasks in roster
+#                     standby_task.filled = True
+#                     standby_task.was_assigned_by_algo = True
+#                     flag = True
+#                     break
+#             if flag: 
+#                 break
             
-standby_assigned_by_algo = 0
-for standby_task in standby_tasks:
-    if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
-print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
+# standby_assigned_by_algo = 0
+# for standby_task in standby_tasks:
+#     if standby_task.was_assigned_by_algo: standby_assigned_by_algo+=1
+# print(len(standby_tasks), ' = ', standby_assigned_by_algo, ' + ', len(standby_tasks) - standby_assigned_by_algo)
 
-print(count_rotations, count_standby)
-print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
-print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
+# print(count_rotations, count_standby)
+# print('The glouton algo managed to place ' + f'{100*pairings_assigned_by_algo/count_rotations}% of the pairings!')
+# print('The glouton algo managed to place ' + f'{100*standby_assigned_by_algo/count_standby}% of the standbys!')
 
 for roster in rosters:
     roster.pairings_tasks = sorted(roster.pairings_tasks, key = lambda task: task.start)
     roster.standby_tasks = sorted(roster.standby_tasks, key = lambda task: task.start or datetime.max)
     roster.individual_tasks = sorted(roster.individual_tasks, key = lambda task: task.start or datetime.max)
-    
+
+
+
+       
+            
+                
 for roster in rosters:
     planning = []
     for pairing in roster.pairings_tasks:
@@ -231,6 +263,7 @@ for roster in rosters:
             'was_assigned_via_algo' : individual.was_assigned_by_algo
         }
     planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
+
 
     filename = f"roster_{roster.fcNumber}.csv"
     
