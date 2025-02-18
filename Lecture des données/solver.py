@@ -19,6 +19,7 @@ standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
 #all pilots with its respectives assignments with its respectives block period (except for the pairings)
 rosters = generate_rosters_list()
 
+print(rosters[1].number_already_assigned_conges)
 
 
 
@@ -45,7 +46,7 @@ for roster in rosters:
                 pairing_task = pairings_tasks_dict.get(id)
                 pairing_task.filled = True
                         
-        
+    
 
 
 #all pairings dictionary that should be used to find the corresponding block period wheen needed 

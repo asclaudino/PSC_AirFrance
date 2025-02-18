@@ -10,7 +10,7 @@ from readerClass import readerClass
 from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 from Tasks import IndividualAssignmentTask
-
+from number_of_already_assigne_conges import number_of_already_assigned_conges
 
 
 class Roster:
@@ -38,6 +38,7 @@ class Roster:
         self.block_periods = []
         self.tasksInitializer(ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks)
         self.blockPeriodsInitializer()
+        self.number_already_assigned_conges = number_of_already_assigned_conges(self.individual_tasks)
         
     def __str__(self):
         return (
@@ -85,7 +86,6 @@ class Roster:
                 })
 
         self.block_periods.sort(key=lambda block_period: block_period['start'] if block_period['start'] is not None else datetime.max)
-
                 
     
     def tasksInitializer(self, ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks):
@@ -96,13 +96,15 @@ class Roster:
                 for task in individual_tasks:
                     individual_assignment_id = task.get("@id")
                     block_period = task.get("Elements").get('@blockPeriod')
-                    new_ia = IndividualAssignmentTask(individual_assignment_id,block_period)
+                    fast_activit_code = task.get("@FASTActivityCode")
+                    new_ia = IndividualAssignmentTask(individual_assignment_id,block_period, fast_activit_code=fast_activit_code)
                     self.individual_tasks.append(new_ia)
              else:
               
-                individual_assignment_id = ground_activities_tasks.get('@id')
-                block_period = ground_activities_tasks.get("Elements").get('@blockPeriod')
-                new_ia = IndividualAssignmentTask(individual_assignment_id,block_period)
+                individual_assignment_id = task.get("@id")
+                block_period = task.get("Elements").get('@blockPeriod')
+                fast_activit_code = task.get("@FASTActivityCode")
+                new_ia = IndividualAssignmentTask(individual_assignment_id,block_period, fast_activit_code=fast_activit_code)
                 self.individual_tasks.append(new_ia)
         
         if ground_activities_tasks:
