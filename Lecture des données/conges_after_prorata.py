@@ -1,4 +1,10 @@
 def number_of_conges_after_proata(prorata_days: int):
+    
+    
+    #Each pair represents respectively 
+    # (the numbers of consecutive days of repos, number of non consecutive days)
+    # that should be in the roster's planning
+     
     mapping = {
         0: (5, 6),
         1: (5, 6),
