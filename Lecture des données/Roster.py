@@ -10,7 +10,7 @@ from readerClass import readerClass
 from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 from Tasks import IndividualAssignmentTask
-from number_of_already_assigne_conges import number_of_already_assigned_conges
+from number_of_already_assigned_conges import number_of_already_assigned_conges
 
 
 class Roster:
@@ -39,6 +39,7 @@ class Roster:
         self.tasksInitializer(ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks)
         self.blockPeriodsInitializer()
         self.number_already_assigned_conges = number_of_already_assigned_conges(self.individual_tasks)
+        print(self.fcNumber, " : ", self.number_already_assigned_conges)
         
     def __str__(self):
         return (

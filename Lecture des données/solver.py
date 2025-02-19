@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
-
-###TODO restraindre à juin 2024
-####TODO Enlever les GA
-##TODO Conter le #rotations déjà affectés // #rotations à placer // #analyse theorique du fichier d'entré (nombres de jours libres / durée des rotations).
+from does_planning_respect_repos import check_planning_conges
 
 
 #all tasks that should been atributed (or not) 
 pairings_tasks, ground_activity_tasks, standby_tasks = generate_tasks_lists()
+
 #print(len(ground_activity_tasks), ground_activity_tasks[0], ground_activity_tasks[1])
+
 ground_tasks_dict   = {task.ground_activity_number: task for task in ground_activity_tasks}
 pairings_tasks_dict = {task.id : task for task in pairings_tasks}
 standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
@@ -19,7 +18,7 @@ standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
 #all pilots with its respectives assignments with its respectives block period (except for the pairings)
 rosters = generate_rosters_list()
 
-print(rosters[1].number_already_assigned_conges)
+#print(rosters[1].number_already_assigned_conges)
 
 
 
@@ -63,18 +62,6 @@ all_pairings_dict = all_pairings()
 
 def test_if_task_fits(first_task, second_task, new_task) -> bool:
     
-    # print(first_task, second_task, new_task)
-    # print('\n')
-    # if first_task['end'] < new_task['start'] \
-    #         and new_task['end'] < second_task['start'] \
-    #         and new_task['start'].month == 6 and new_task['end'].month == 6 \
-    #         and new_task['start'].year == 2024 and new_task['end'].year == 2024:
-    #             print(first_task, second_task, new_task)
-    #             print(first_task['end'] < new_task['start'] \
-    #                 and new_task['end'] < second_task['start'] \
-    #                 and new_task['start'].month == 6 and new_task['end'].month == 6 \
-    #                 and new_task['start'].year == 2024 and new_task['end'].year == 2024)
-    #print(new_task)
     if not new_task['start'] or not new_task['end']: return False
     return first_task['end'] < new_task['start'] \
            and new_task['end'] < second_task['start'] \
@@ -85,25 +72,6 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
 
     
 #start of the real optmization algorithm
-
-def checkDispoVacance(planning):
-    dispo_5 = []
-    dispo_6 = []
-    for i in range(0, len(planning)-1):
-        end_current = planning[i]['end']
-        start_next = planning[i+1]['start']
-        interval = start_next - end_current
-        if(interval >= timedelta(days=6)):
-            dispo_6.append(interval)
-        elif(interval >= timedelta(days=5)):
-            dispo_5.append(interval)
-    if not dispo_6.empty() and not dispo_5.empty():
-        return True
-    elif len(dispo_6 > 1):
-        return True
-    else:
-        return False
-
 
 
 count_rotations = 0
@@ -123,21 +91,23 @@ for pairing in pairings_tasks:
                     'rpcexactdate': pairing.rpc_exact_date
                 }
                 
-                # if pos < len(roster.block_periods)-1:
-                #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
+               
                 if pos < len(roster.block_periods) - 1 \
                     and test_if_task_fits(block_period, roster.block_periods[pos + 1], new_task) \
                     and roster.crew_type == pairing.type_place:
-                        # print(pos)
-                        # print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place,
-                        #       'place number: ', pairing.place_number, 'out of: ', pairing.total_places)
-                        roster.block_periods.append(new_task)
-                        roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                        roster.pairings_tasks.append(pairing)  # Check the format of pairing and the pairings_tasks in roster
-                        pairing.filled = True
-                        pairing.was_assigned_by_algo = True
-                        flag = True
-                        break
+                      
+                        temp_block_periods = roster.block_periods.copy()
+                        temp_block_periods.append(new_task)
+                        
+                        # New checking to verify the constraints of rest
+                        if check_planning_conges(temp_block_periods, roster.number_already_assigned_conges):
+                            roster.block_periods.append(new_task)
+                            roster.block_periods.sort(key=lambda block_period: block_period['start'])
+                            roster.pairings_tasks.append(pairing)  
+                            pairing.filled = True
+                            pairing.was_assigned_by_algo = True
+                            flag = True
+                            break
 
             if flag: 
                 break

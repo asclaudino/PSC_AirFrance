@@ -13,13 +13,14 @@ def number_of_already_assigned_conges(tasks: List, month: int = 6) -> int:
                 # For each year that the task spans, calculate the overlap with the specified month.
                 for year in range(task.start.year, task.end.year + 1):
                     
-                    try:
-                        # Define the start and end of the month for this year.
-                        month_start = datetime(year, month, 1)
-                    except ValueError:
-                        # Skip invalid dates (if month is out of range, though it shouldn't be)
-                        continue
-
+                    # try:
+                    #     # Define the start and end of the month for this year.
+                    #     
+                    # except ValueError:
+                    #     # Skip invalid dates (if month is out of range, though it shouldn't be)
+                    #     continue
+                    
+                    month_start = datetime(year, month, 1)
                     # Calculate the start of the next month.
                     if month == 12:
                         month_end = datetime(year + 1, 1, 1)
