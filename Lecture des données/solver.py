@@ -202,8 +202,11 @@ for roster in rosters:
        
             
                 
+# Initialize an empty list to collect all tasks from all rosters
+all_planning = []
+
 for roster in rosters:
-    planning = []
+    # Process pairing tasks
     for pairing in roster.pairings_tasks:
         task_pairing = {
             'roster_id': roster.fcNumber,
@@ -211,9 +214,11 @@ for roster in rosters:
             'id': pairing.id,
             'start': pairing.start,
             'end': pairing.end,
-            'was_assigned_via_algo': pairing.was_assigned_by_algo 
+            'was_assigned_via_algo': pairing.was_assigned_by_algo
         }
-        planning.append(task_pairing)
+        all_planning.append(task_pairing)
+        
+    # Process standby tasks
     for standby in roster.standby_tasks:
         task_standby = {
             'roster_id': roster.fcNumber,
@@ -223,7 +228,9 @@ for roster in rosters:
             'end': standby.end,
             'was_assigned_via_algo': standby.was_assigned_by_algo
         }
-        planning.append(task_standby)
+        all_planning.append(task_standby)
+        
+    # Process individual tasks
     for individual in roster.individual_tasks:
         task_individual = {
             'roster_id': roster.fcNumber,
@@ -231,23 +238,23 @@ for roster in rosters:
             'id': individual.id,
             'start': individual.start,
             'end': individual.end,
-            'was_assigned_via_algo' : individual.was_assigned_by_algo
+            'was_assigned_via_algo': individual.was_assigned_by_algo
         }
-    planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
+        all_planning.append(task_individual)
 
+# Sort all tasks by the 'start' time, treating None as the maximum datetime
+all_planning = sorted(all_planning, key=lambda task: task['roster_id'])
 
-    filename = f"roster_{roster.fcNumber}.csv"
-    
-    # Define CSV column headers
-    fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
-    # Write to CSV file
-    with open(filename, mode="w", newline="") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        # Write the header row
-        writer.writeheader()
-        # Write data rows
-        writer.writerows(planning)
-    print(f"CSV file '{filename}' has been created successfully.")
+# Write the aggregated tasks to a single CSV file
+filename = "all_rosters.csv"
+fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
+
+with open(filename, mode="w", newline="") as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()  # Write header row
+    writer.writerows(all_planning)  # Write all task rows
+
+print(f"CSV file '{filename}' has been created successfully.")
     
 
 
