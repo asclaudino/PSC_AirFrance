@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
-
-###TODO restraindre à juin 2024
-####TODO Enlever les GA
-##TODO Conter le #rotations déjà affectés // #rotations à placer // #analyse theorique du fichier d'entré (nombres de jours libres / durée des rotations).
+from does_planning_respect_repos import check_planning_conges
 
 
 #all tasks that should been atributed (or not) 
 pairings_tasks, ground_activity_tasks, standby_tasks = generate_tasks_lists()
+
 #print(len(ground_activity_tasks), ground_activity_tasks[0], ground_activity_tasks[1])
+
 ground_tasks_dict   = {task.ground_activity_number: task for task in ground_activity_tasks}
 pairings_tasks_dict = {task.id : task for task in pairings_tasks}
 standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
@@ -19,6 +18,7 @@ standby_tasks_dict  = {task.standby_number : task for task in standby_tasks}
 #all pilots with its respectives assignments with its respectives block period (except for the pairings)
 rosters = generate_rosters_list()
 
+#print(rosters[1].number_already_assigned_conges)
 
 
 
@@ -45,7 +45,7 @@ for roster in rosters:
                 pairing_task = pairings_tasks_dict.get(id)
                 pairing_task.filled = True
                         
-        
+    
 
 
 #all pairings dictionary that should be used to find the corresponding block period wheen needed 
@@ -62,18 +62,6 @@ all_pairings_dict = all_pairings()
 
 def test_if_task_fits(first_task, second_task, new_task) -> bool:
     
-    # print(first_task, second_task, new_task)
-    # print('\n')
-    # if first_task['end'] < new_task['start'] \
-    #         and new_task['end'] < second_task['start'] \
-    #         and new_task['start'].month == 6 and new_task['end'].month == 6 \
-    #         and new_task['start'].year == 2024 and new_task['end'].year == 2024:
-    #             print(first_task, second_task, new_task)
-    #             print(first_task['end'] < new_task['start'] \
-    #                 and new_task['end'] < second_task['start'] \
-    #                 and new_task['start'].month == 6 and new_task['end'].month == 6 \
-    #                 and new_task['start'].year == 2024 and new_task['end'].year == 2024)
-    #print(new_task)
     if not new_task['start'] or not new_task['end']: return False
     return first_task['end'] < new_task['start'] \
            and new_task['end'] < second_task['start'] \
@@ -84,25 +72,6 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
 
     
 #start of the real optmization algorithm
-
-def checkDispoVacance(planning):
-    dispo_5 = []
-    dispo_6 = []
-    for i in range(0, len(planning)-1):
-        end_current = planning[i]['end']
-        start_next = planning[i+1]['start']
-        interval = start_next - end_current
-        if(interval >= timedelta(days=6)):
-            dispo_6.append(interval)
-        elif(interval >= timedelta(days=5)):
-            dispo_5.append(interval)
-    if not dispo_6.empty() and not dispo_5.empty():
-        return True
-    elif len(dispo_6 > 1):
-        return True
-    else:
-        return False
-
 
 
 count_rotations = 0
@@ -122,21 +91,23 @@ for pairing in pairings_tasks:
                     'rpcexactdate': pairing.rpc_exact_date
                 }
                 
-                # if pos < len(roster.block_periods)-1:
-                #     print(test_if_task_fits(block_period,roster.block_periods[pos+1], new_task) )
+               
                 if pos < len(roster.block_periods) - 1 \
                     and test_if_task_fits(block_period, roster.block_periods[pos + 1], new_task) \
                     and roster.crew_type == pairing.type_place:
-                        # print(pos)
-                        # print('added pairing ', pairing.pairing_number, 'type: ', pairing.type_place,
-                        #       'place number: ', pairing.place_number, 'out of: ', pairing.total_places)
-                        roster.block_periods.append(new_task)
-                        roster.block_periods.sort(key=lambda block_period: block_period['start'])
-                        roster.pairings_tasks.append(pairing)  # Check the format of pairing and the pairings_tasks in roster
-                        pairing.filled = True
-                        pairing.was_assigned_by_algo = True
-                        flag = True
-                        break
+                      
+                        temp_block_periods = roster.block_periods.copy()
+                        temp_block_periods.append(new_task)
+                        
+                        # New checking to verify the constraints of rest
+                        if check_planning_conges(temp_block_periods, roster.number_already_assigned_conges):
+                            roster.block_periods.append(new_task)
+                            roster.block_periods.sort(key=lambda block_period: block_period['start'])
+                            roster.pairings_tasks.append(pairing)  
+                            pairing.filled = True
+                            pairing.was_assigned_by_algo = True
+                            flag = True
+                            break
 
             if flag: 
                 break
@@ -231,8 +202,11 @@ for roster in rosters:
        
             
                 
+# Initialize an empty list to collect all tasks from all rosters
+all_planning = []
+
 for roster in rosters:
-    planning = []
+    # Process pairing tasks
     for pairing in roster.pairings_tasks:
         task_pairing = {
             'roster_id': roster.fcNumber,
@@ -240,9 +214,11 @@ for roster in rosters:
             'id': pairing.id,
             'start': pairing.start,
             'end': pairing.end,
-            'was_assigned_via_algo': pairing.was_assigned_by_algo 
+            'was_assigned_via_algo': pairing.was_assigned_by_algo
         }
-        planning.append(task_pairing)
+        all_planning.append(task_pairing)
+        
+    # Process standby tasks
     for standby in roster.standby_tasks:
         task_standby = {
             'roster_id': roster.fcNumber,
@@ -252,7 +228,9 @@ for roster in rosters:
             'end': standby.end,
             'was_assigned_via_algo': standby.was_assigned_by_algo
         }
-        planning.append(task_standby)
+        all_planning.append(task_standby)
+        
+    # Process individual tasks
     for individual in roster.individual_tasks:
         task_individual = {
             'roster_id': roster.fcNumber,
@@ -260,23 +238,23 @@ for roster in rosters:
             'id': individual.id,
             'start': individual.start,
             'end': individual.end,
-            'was_assigned_via_algo' : individual.was_assigned_by_algo
+            'was_assigned_via_algo': individual.was_assigned_by_algo
         }
-    planning = sorted(planning, key= lambda task: task['start'] or datetime.max)
+        all_planning.append(task_individual)
 
+# Sort all tasks by the 'start' time, treating None as the maximum datetime
+all_planning = sorted(all_planning, key=lambda task: task['roster_id'])
 
-    filename = f"roster_{roster.fcNumber}.csv"
-    
-    # Define CSV column headers
-    fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
-    # Write to CSV file
-    with open(filename, mode="w", newline="") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        # Write the header row
-        writer.writeheader()
-        # Write data rows
-        writer.writerows(planning)
-    print(f"CSV file '{filename}' has been created successfully.")
+# Write the aggregated tasks to a single CSV file
+filename = "all_rosters.csv"
+fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
+
+with open(filename, mode="w", newline="") as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()  # Write header row
+    writer.writerows(all_planning)  # Write all task rows
+
+print(f"CSV file '{filename}' has been created successfully.")
     
 
 

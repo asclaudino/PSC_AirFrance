@@ -41,9 +41,15 @@ def generate_tasks_lists():
                 if nb_min > 0 :
                     for i in range(int(booking.get('@nbMin'))):
                         task = PairingTask(pairing_number,id,type,False,block_period,aircraft_type, i+1, nb_min, racDuration, rpcDuration)
-                        pairings_tasks.append(task)
-
-
+                        duration = task.end - task.start
+                        
+                        ##keeping just the rotations with at least 24hours of duration
+                        if duration and duration >= timedelta(hours=24):
+                            pairings_tasks.append(task)
+                        
+                        
+        ## sorting by the longest block periods to the smallest
+        sorted(pairings_tasks, key=lambda task: task.end - task.start, reverse=True)
 
     standby_data = data.get('EasyData').get('Activities').get('Standby')
 

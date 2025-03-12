@@ -172,12 +172,13 @@ class GroundActivityTask:
    
 class IndividualAssignmentTask:
     
-    def __init__(self, id: str,block_period: str, was_assigned_by_algo: Optional[bool] = False):
+    def __init__(self, id: str,block_period: str, was_assigned_by_algo: Optional[bool] = False, fast_activit_code: Optional[str]=''):
         
         self.id = id
         self.block_period = block_period  
         self.start, self.end = parse_block_period(block_period)   
         self.was_assigned_by_algo = was_assigned_by_algo 
+        self.fast_activit_code = fast_activit_code
     
     def __str__(self):
         return (
