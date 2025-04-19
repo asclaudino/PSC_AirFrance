@@ -28,7 +28,7 @@ def generate_rosters_list():
 
 
     
-    with open('../Ressources/Export20PN.xml.json', 'r') as file:
+    with open('../Ressources/Export20PN.json', 'r') as file:
          data = json.load(file)
 
 
