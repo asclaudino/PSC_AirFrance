@@ -5,7 +5,7 @@ from conges_after_prorata import number_of_conges_after_proata
 
 def overlap_in_month(interval_start: datetime, interval_end: datetime, month: int) -> timedelta:
     """
-    Returns the total overlap (as a timedelta) between the interval [interval_start, interval_end)
+    Returns the total overlap (as a timedelta) between the interval (interval_start, interval_end)
     and all occurrences of the given month in the interval's timespan.
     """
     total_overlap = timedelta(0)

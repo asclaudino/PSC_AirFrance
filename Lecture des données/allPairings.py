@@ -6,7 +6,7 @@ from readerClass import readerClass
 
 
 def all_pairings():
-    with open('Ressources/Export20PN.xml.json', 'r') as file:
+    with open('Ressources/Export20PN.json', 'r') as file:
         data = json.load(file)
 
     reader = readerClass()

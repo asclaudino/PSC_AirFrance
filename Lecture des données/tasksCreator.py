@@ -3,8 +3,6 @@ import json
 import tkinter as tk
 from tkinter import ttk
 from datetime import timedelta
-
-
 from GroundActivity import GroundActivity
 from Pairing import Pairing
 from Standby import Standby
@@ -15,7 +13,7 @@ from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 
 def generate_tasks_lists(): 
-    with open('Ressources/Export20PN.xml.json', 'r') as file:
+    with open('../Ressources/Export20PN.json', 'r') as file:
          data = json.load(file)
 
 
