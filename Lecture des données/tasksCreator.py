@@ -13,7 +13,7 @@ from Tasks import StandByTask, PairingTask
 from Tasks import GroundActivityTask
 
 def generate_tasks_lists(): 
-    with open('/../Ressources/Export20PN.json', 'r') as file:
+    with open('../Ressources/Export20PN.json', 'r') as file:
          data = json.load(file)
 
 
