@@ -257,6 +257,7 @@ with open(filename, mode="w", newline="") as csv_file:
     writer.writerows(all_planning)  # Write all task rows
 
 print(f"CSV file '{filename}' has been created successfully.")
+print(rosters[0].cost(6))
     
 
 
