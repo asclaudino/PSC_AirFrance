@@ -1,6 +1,6 @@
 import ast
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from GroundActivity import GroundActivity
 from Pairing import Pairing
 from Standby import Standby
@@ -160,6 +160,50 @@ class Roster:
                 #block_period = standby_tasks.get("Elements").get('@blockPeriod')
                 new_stb = StandByTask(standby_activity_number,id,'',True,'','')
                 self.standby_tasks.append(new_stb)
+
+        
+    #Calcul du coût du pilote
+    #0€ jusqu'à 20 heures de vol
+    #200€/100€ selon CDB/OPL par heures pour > 20h
+    #400€/200€ pour > 55h
+    
+    def costbis(self,flight_time_minutes: float) -> int:
+        if self.crew_type == "CDB":
+            if flight_time_minutes < 20*60:
+                return 0
+            elif 20*60 <= flight_time_minutes < 55*60:
+                return int((200/60) * (flight_time_minutes - 20*60))
+            else:
+                return int((200/60) * 35 * 60 + (flight_time_minutes - 55*60) * (400/60))
+            
+        else :
+            if flight_time_minutes < 20*60:
+                return 0
+            elif 20*60 <= flight_time_minutes < 55*60:
+                return int((100/60) * (flight_time_minutes - 20*60))
+            else:
+                return int((100/60) * 35 * 60 + (flight_time_minutes - 55*60) * (200/60))
+
+    
+    def cost(self,mois : int) -> float:
+        total_flight_minutes = 0.0
+        for p in self.pairings_tasks:
+            if p.start.month == mois and p.end.month == mois:
+            # Calcul de la durée en minutes entre p.start et p.end
+                duration = (p.end - p.start).total_seconds() / 60
+                total_flight_minutes += duration
+        for s in self.standby_tasks:
+            if s.start.month == mois and s.end.month == mois:
+                duration = (s.end-s.start).total_seconds() / 60
+                total_flight_minutes += duration
+        
+        print(total_flight_minutes)
+        return self.costbis(total_flight_minutes)
+    
+
+
+
+
                 
 
             

@@ -214,7 +214,9 @@ for roster in rosters:
             'id': pairing.id,
             'start': pairing.start,
             'end': pairing.end,
-            'was_assigned_via_algo': pairing.was_assigned_by_algo
+            'was_assigned_via_algo': pairing.was_assigned_by_algo,
+            'rac_exact_date': pairing.rac_exact_date,
+            'rpc_exact_date': pairing.rpc_exact_date
         }
         all_planning.append(task_pairing)
         
@@ -247,7 +249,7 @@ all_planning = sorted(all_planning, key=lambda task: task['roster_id'])
 
 # Write the aggregated tasks to a single CSV file
 filename = "all_rosters.csv"
-fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo']
+fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo', 'rac_exact_date', 'rpc_exact_date']
 
 with open(filename, mode="w", newline="") as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -255,6 +257,7 @@ with open(filename, mode="w", newline="") as csv_file:
     writer.writerows(all_planning)  # Write all task rows
 
 print(f"CSV file '{filename}' has been created successfully.")
+print(rosters[0].cost(6))
     
 
 
