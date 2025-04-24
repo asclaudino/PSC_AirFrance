@@ -39,7 +39,7 @@ class Roster:
         self.tasksInitializer(ground_activities_tasks, standby_tasks, individual_tasks, pairings_tasks)
         self.blockPeriodsInitializer()
         self.number_already_assigned_conges = number_of_already_assigned_conges(self.individual_tasks)
-        print(self.fcNumber, " : ", self.number_already_assigned_conges)
+        #print(self.fcNumber, " : ", self.number_already_assigned_conges)
         
     def __str__(self):
         return (
@@ -140,9 +140,13 @@ class Roster:
             else:
   
                     
-                ground_activity_number = ground_activities_tasks.get("@activityId")
-                id = ground_activities_tasks.get('@id')
-                new_pa = GroundActivityTask(ground_activity_number,id,'',True,'')
+                pairing_number = pairings_tasks.get("@activityId")
+                id = pairings_tasks.get('@id')
+                if self.all_pairings[pairing_number]:
+                        block_period = self.all_pairings[pairing_number].blockPeriod
+                else:
+                    block_period = "2024-01-01T06:30:00.000Z;2024-01-02T04:36:00.000Z"
+                new_pa = PairingTask(pairing_number,id,'',True,block_period, '')
                 self.pairings_tasks.append(new_pa)
                 
         if standby_tasks:

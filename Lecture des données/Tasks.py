@@ -80,7 +80,7 @@ def add_duration_to_datetime(start_datetime, duration: str):
 
 class PairingTask:
     
-    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, aircraft_type: str, place_number=1, total_places=1, racDuration='', rpcDuration=''):
+    def __init__(self, pairing_number: str, id: str, type_place: str, filled: bool, block_period: str, aircraft_type: str, place_number=1, total_places=1, racDuration='', rpcDuration='', total_flight_time=''):
         
         self.pairing_number = pairing_number
         self.id = id
@@ -94,6 +94,8 @@ class PairingTask:
         self.start, self.end = parse_block_period(block_period)
         self.rac_exact_date = subtract_duration_from_datetime(self.start, racDuration)
         self.rpc_exact_date = add_duration_to_datetime(self.end, rpcDuration)
+        self.rotation_total_duration = self.end - self.start
+        self.total_flight_time = total_flight_time
 
         
     
@@ -115,7 +117,7 @@ class PairingTask:
 
 class StandByTask:
     
-    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str,aircraft_type: str,place_number=1, total_places=1):
+    def __init__(self, standby_number: str, id: str, type_place: str, filled: bool, block_period: str,aircraft_type: str,place_number=1, total_places=1, rpc_duration=''):
         
         self.standby_number = standby_number
         self.id = id
@@ -126,7 +128,20 @@ class StandByTask:
         self.total_places = total_places
         self.was_assigned_by_algo = False 
         self.aircraft_type = aircraft_type
+        self.rpc_duration = parse_duration(rpc_duration)
+        self.rac_duration = timedelta(0)
         self.start, self.end = parse_block_period(block_period) 
+        # Only calculate durations if start and end are valid
+        if self.start and self.end:
+            self.standby_total_duration = self.end - self.start
+            self.rac_exact_date = self.start + getattr(self, 'rac_duration', timedelta(0))
+            self.rpc_exact_date = self.end + getattr(self, 'rpc_duration', timedelta(0))
+        else:
+            self.standby_total_duration = timedelta(0)
+            self.rac_exact_date = None
+            self.rpc_exact_date = None
+
+
         
     def __str__(self):
         return (

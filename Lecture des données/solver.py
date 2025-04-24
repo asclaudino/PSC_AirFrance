@@ -4,7 +4,7 @@ from tasksCreator import generate_tasks_lists
 from rosterCreator import generate_rosters_list
 from allPairings import all_pairings
 from does_planning_respect_repos import check_planning_conges
-
+import time
 
 #all tasks that should been atributed (or not) 
 pairings_tasks, ground_activity_tasks, standby_tasks = generate_tasks_lists()
@@ -72,7 +72,7 @@ def test_if_task_fits(first_task, second_task, new_task) -> bool:
 
     
 #start of the real optmization algorithm
-
+start_time = time.time()
 
 count_rotations = 0
 for pairing in pairings_tasks:
@@ -114,12 +114,30 @@ for pairing in pairings_tasks:
 
 pairings_assigned_by_algo = 0
 
-for pairing in pairings_tasks:
-    if pairing.was_assigned_by_algo: pairings_assigned_by_algo+=1
-print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings_tasks) - pairings_assigned_by_algo)
+
+end_time = time.time()
+execution_time = end_time - start_time
+
+# for pairing in pairings_tasks:
+#     if pairing.was_assigned_by_algo: pairings_assigned_by_algo+=1
+# print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings_tasks) - pairings_assigned_by_algo)
 
 
- 
+# print("\nPairings assigned by algorithm per roster:")
+# for roster in rosters:
+#     count = sum(1 for pairing in roster.pairings_tasks if getattr(pairing, 'was_assigned_by_algo', False))
+#     print(f"Roster {roster.fcNumber if hasattr(roster, 'fcNumber') else 'unknown'} ({roster.crew_type}): {count} pairings")
+
+
+# print("\nPairings assigned by algorithm per roster (with total flight time):")
+# for roster in rosters:
+#     assigned_pairings = [pairing for pairing in roster.pairings_tasks if getattr(pairing, 'was_assigned_by_algo', False)]
+#     count = len(assigned_pairings)
+#     total_flight_time = sum((getattr(pairing, 'duration', timedelta(0)) for pairing in assigned_pairings), timedelta(0))    
+#     print(f"Roster {roster.fcNumber if hasattr(roster, 'fcNumber') else 'unknown'} ({roster.crew_type}): "
+#           f"{count} pairings, total flight time: {total_flight_time} hours")
+
+
 # for ga_task in ground_activity_tasks:
 #     #print('entrei na ground_activity_task ', ga_task.ground_activity_number, 'type: ', ga_task.type_place, ' place number: ', ga_task.place_number, ' out of: ', ga_task.total_places)
 #     flag = False
@@ -153,7 +171,7 @@ print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings
 # print(len(ground_activity_tasks), ' = ', ga_assigned_by_algo, ' + ', len(ground_activity_tasks) - ga_assigned_by_algo)
 
 
-# count_standby = 0
+count_standby = 0
 # for standby_task in standby_tasks:
 #     flag = False
 #     if not standby_task.filled and standby_task.aircraft_type == '777':
@@ -182,6 +200,87 @@ print(len(pairings_tasks), ' = ', pairings_assigned_by_algo, ' + ', len(pairings
 #                     break
 #             if flag: 
 #                 break
+
+# for standby_task in standby_tasks:
+#     flag = False
+#     if not standby_task.filled and standby_task.aircraft_type == '777':
+#         if standby_task.start.month == 6 \
+#            and standby_task.start.year == 2024 and standby_task.end.year == 2024:
+#             count_standby += 1
+
+#         for roster in rosters: 
+#             for (pos, block_period) in enumerate(roster.block_periods):
+#                 new_task = {
+#                     'start': standby_task.start,
+#                     'end': standby_task.end,
+#                     'racexactdate': standby_task.rac_exact_date,
+#                     'rpcexactdate': standby_task.rpc_exact_date
+#                 }
+
+#                 if new_task['start'] and new_task['end'] \
+#                     and pos < len(roster.block_periods) - 1 \
+#                     and test_if_task_fits(block_period, roster.block_periods[pos + 1], new_task) \
+#                     and roster.crew_type == standby_task.type_place:
+
+#                     temp_block_periods = roster.block_periods.copy()
+#                     temp_block_periods.append(new_task)
+
+#                     # New checking to verify the constraints of rest (congés)
+#                     if check_planning_conges(temp_block_periods, roster.number_already_assigned_conges):
+#                         roster.block_periods.append(new_task)
+#                         roster.block_periods.sort(key=lambda block_period: block_period['start'])
+#                         roster.standby_tasks.append(standby_task)
+#                         standby_task.filled = True
+#                         standby_task.was_assigned_by_algo = True
+#                         flag = True
+#                         break
+#             if flag:
+#                 break
+
+            
+end_time = time.time()
+execution_time = end_time - start_time     
+            
+print(f"\nExecution time: {execution_time:.2f} seconds")
+print("\nPairings assigned by algorithm per roster (with total flight time and unique rotations):")
+for roster in rosters:
+    assigned_pairings = [pairing for pairing in roster.pairings_tasks if getattr(pairing, 'was_assigned_by_algo', False)]
+    count = len(assigned_pairings)
+    rotation_total_duration = sum((getattr(pairing, 'rotation_total_duration', timedelta(0)) for pairing in assigned_pairings), timedelta(0))
+    rotation_total_duration = rotation_total_duration.total_seconds() / 3600
+    
+    total_flight_time = sum((getattr(pairing, 'total_flight_time', timedelta(0)) for pairing in assigned_pairings), timedelta(0))
+    total_flight_time = total_flight_time.total_seconds() / 3600
+    
+    
+
+    # Get unique rotations (using ID or pairing_number depending on your object)
+    unique_rotation_ids = set(getattr(pairing, 'pairing_number', None) for pairing in assigned_pairings)
+    unique_rotations_count = len(unique_rotation_ids)
+
+    print(f"Roster {roster.fcNumber if hasattr(roster, 'fcNumber') else 'unknown'} ({roster.crew_type}): "
+          f"{count} pairings, total time in rotations duties: {rotation_total_duration:.2f} hours, "
+          f"{unique_rotations_count} unique rotations", f"total flight time :  {total_flight_time:.2f} hours")
+    
+    # assigned_standbys = [standby for standby in roster.standby_tasks if getattr(standby, 'was_assigned_by_algo', False)]
+    # standby_count = len(assigned_standbys)
+
+    # # Total duration of assigned standby tasks (in hours)
+    # standby_total_duration = sum(
+    #     (getattr(standby, 'standby_total_duration', timedelta(0)) for standby in assigned_standbys),
+    #     timedelta(0)
+    # )
+    # standby_total_duration_hours = standby_total_duration.total_seconds() / 3600
+
+    # # Get unique standby numbers
+    # unique_standby_ids = set(getattr(standby, 'standby_number', None) for standby in assigned_standbys)
+    # unique_standby_count = len(unique_standby_ids)
+
+    # # Print summary
+    # print(f"Roster {getattr(roster, 'fcNumber', 'unknown')} ({roster.crew_type}): "
+    #       f"{standby_count} standbys, total time in standby duties: {standby_total_duration_hours:.2f} hours, "
+    #       f"{unique_standby_count} unique standbys")
+
             
 # standby_assigned_by_algo = 0
 # for standby_task in standby_tasks:
@@ -248,7 +347,7 @@ for roster in rosters:
 all_planning = sorted(all_planning, key=lambda task: task['roster_id'])
 
 # Write the aggregated tasks to a single CSV file
-filename = "all_rosters.csv"
+filename = "all_rosters_100.csv"
 fieldnames = ['roster_id', 'type', 'id', 'start', 'end', 'was_assigned_via_algo', 'rac_exact_date', 'rpc_exact_date']
 
 with open(filename, mode="w", newline="") as csv_file:
